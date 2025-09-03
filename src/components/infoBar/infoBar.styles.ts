@@ -3,10 +3,14 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
     infoBar: {
         display: 'flex',
+        position: 'absolute',
+        top: 0,
         flexDirection: 'row',
         width: '100%',
-        height: 100,
-        justifyContent: 'space-between'
+        paddingVertical:10,
+        justifyContent: 'space-between',
+        backgroundColor: '#f20717',
+        zIndex: 3
     },
     infoBox:{
         display: 'flex',
@@ -31,7 +35,10 @@ export const styles = StyleSheet.create({
         objectFit: 'cover'
     },
     accName:{
-        fontFamily: 'Roboto'
+        fontFamily: 'Roboto',
+        color: '#E0E0E0',
+        fontSize: 14,
+        fontWeight: 800
     },
     toolBox:{
         display:'flex',

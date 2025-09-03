@@ -10,14 +10,14 @@ export const Register = () => {
     ];
 
     const fields:AuthFieldsType[] = [
-        { placeholder: "Email or Username", key: "emailOrUsername" },
-        { placeholder: "Full name", key: "fullName" },
-        { placeholder: "Passwords", key: "passwords" },
+        { placeholder: "Tên tài khoản", key: "emailOrUsername" },
+        { placeholder: "Họ và tên", key: "fullName" },
+        { placeholder: "Mật khẩu", key: "passwords" },
     ];
 
     return (
         <AuthLayout 
-        welcomeWords="Welcome new friend! Nice to meet you"
+        welcomeWords="Xin chào, hãy bắt đầu cuộc phiêu lưu nào!"
         SocialMediaList={SocialMediaList} 
         isLogin={false} 
         fields={fields}/>

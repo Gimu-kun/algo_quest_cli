@@ -5,11 +5,9 @@ import { useSharedValue } from "react-native-reanimated";
 import Carousel, { ICarouselInstance, Pagination } from "react-native-reanimated-carousel";
  
 const defaultData = [
-	"https://firebasestorage.googleapis.com/v0/b/admin-4f88c.appspot.com/o/banner1.jpg?alt=media&token=3f1de09b-9e4a-4984-9238-05d0a187c173",
-	"https://firebasestorage.googleapis.com/v0/b/admin-4f88c.appspot.com/o/banner2.jpg?alt=media&token=1a4dddd1-6414-4377-97b8-9c34ce062b02",
-	"https://firebasestorage.googleapis.com/v0/b/admin-4f88c.appspot.com/o/banner3.jpg?alt=media&token=dcae676a-2bca-4058-ab6b-7ca6ccca80bb",
-	"https://firebasestorage.googleapis.com/v0/b/admin-4f88c.appspot.com/o/banner4.jpg?alt=media&token=d78dfc4a-450b-403b-89c0-618819589495",
-	"https://firebasestorage.googleapis.com/v0/b/admin-4f88c.appspot.com/o/banner5.jpg?alt=media&token=e7145fa0-63ab-4f75-9314-de032b06aa0a",
+	"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/%E2%99%A5%20Yoshi%20%E2%99%A5.jpeg?alt=media&token=69d07048-c874-433e-98b5-b9ad417126d2",
+	"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/Mario%20Kart.jpeg?alt=media&token=0bbd8a49-4c93-4605-a37e-f39d409b2b0e",
+	"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/Mario%20Party.jpeg?alt=media&token=0f70b62b-d909-4d50-98c9-84a2b0179ef2"
 ];
  
 function HomeCarousel() {
@@ -35,6 +33,7 @@ function HomeCarousel() {
 				pagingEnabled={true}
 				snapEnabled={true}
 				width={width}
+				autoPlay
 				style={{
 					width: width,
 				}}

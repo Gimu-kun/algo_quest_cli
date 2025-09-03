@@ -12,6 +12,7 @@ import { LandingPage } from './screens/LandingPage/LandingPage';
 import { Login } from './screens/Login/Login';
 import { Register } from './screens/Register/Register';
 import { Home } from './screens/Home/Home';
+import {Roadmap} from './screens/Roadmap/Roadmap';
 
 
 const HomeTabs = createBottomTabNavigator({
@@ -87,6 +88,13 @@ const RootStack = createNativeStackNavigator({
       screen: HomeTabs,
       options: {
         title: 'Home',
+        headerShown: false,
+      },
+    },
+    Roadmap: {
+      screen: Roadmap,
+      options: {
+        title: 'Roadmap',
         headerShown: false,
       },
     },

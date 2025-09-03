@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Button, Icon, IconButton } from "react-native-paper";
-import { SocialMediaBtnProps } from "../types/socialMediaTypes";
+import { SocialMediaBtnProps } from "../../types/socialMediaTypes";
 
 interface SocialMediaBoxProps {
     SocialMediaList: SocialMediaBtnProps[];
@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         gap: 30,
-        paddingVertical: 10
     },
     btn:{
         backgroundColor: "transparent",

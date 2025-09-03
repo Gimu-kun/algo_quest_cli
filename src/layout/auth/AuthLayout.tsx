@@ -1,10 +1,10 @@
-import { View } from "react-native";
+import { View, Image } from "react-native";
 import { Button, TextInput, Text } from "react-native-paper";
-import DividerWithText from "../../components/DividerWithText";
 import styles from "./authLayout.style";
-import SocialMediaBox from "../../components/SocialMediaBox";
+import SocialMediaBox from "../../components/socialMediaBox/SocialMediaBox";
 import { SocialMediaBtnProps } from "../../types/socialMediaTypes";
 import { AuthFieldsType } from "../../types/authFieldsType";
+import DividerWithText from "../../components/dividerWithText/DividerWithText";
 
 type AuthLayoutProps = {
     welcomeWords?: string,
@@ -18,7 +18,10 @@ const AuthLayout = ({SocialMediaList,isLogin,fields,welcomeWords}: AuthLayoutPro
         <View style={styles.container}>
             <View style={styles.formContainer}>
                 <View>
-                    <Text style={styles.welcomeWords}>{welcomeWords}</Text>
+                    <View>
+                        <Text style={styles.welcomeWords}>{welcomeWords}</Text>
+                        <Image style={styles.textHolder} source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/Luigi-txt-holder-removebg-preview.png?alt=media&token=73ee4d82-119f-4a6c-bbc5-327b382f4d4d"}}/>
+                    </View>
                     <View style={styles.fieldContainer}>
                         {
                             fields.map((field) => (
@@ -29,20 +32,21 @@ const AuthLayout = ({SocialMediaList,isLogin,fields,welcomeWords}: AuthLayoutPro
                                 secureTextEntry={field.key === "password" ? true : false}/>
                             ))
                         }
-                        {isLogin && <Text style={styles.forgotPassword}>Forgot Password?</Text>}
+                        {isLogin && <Text style={styles.forgotPassword}>Quên mật khẩu?</Text>}
                     </View>
                     <View>
-                        <Button style={styles.button} icon={isLogin ? "login" : "account"} mode="contained" buttonColor='#00aaffff' >
-                            <Text style={styles.buttonTxt}>{isLogin ? "Login" : "Register"}</Text>
+                        <Button style={styles.button} icon={isLogin ? "login" : "account"} mode="contained" buttonColor='#f20717' >
+                            <Text style={styles.buttonTxt}>{isLogin ? "Đăng nhập" : "Đăng ký"}</Text>
                         </Button>
-                        <DividerWithText text="Login with social media" />
+                        <Image style={styles.btnHolder} source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/btn_hold-removebg-preview.png?alt=media&token=0973f18d-bcc8-45fc-84ab-ecac7da3c1d5"}}/>
+                        <DividerWithText text="Đăng nhập bằng cách khác" />
                         <SocialMediaBox SocialMediaList={SocialMediaList} />
                     </View>
                 </View>
                 <View style={styles.registerContainer}>
                     {isLogin ? 
-                    <Text>Don't have an account? <Text style={styles.linkText}>Register now</Text></Text> :
-                    <Text>Already have an account? <Text style={styles.linkText}>Login</Text></Text>
+                    <Text>Bạn chưa có tài khoản? <Text style={styles.linkText}>Đăng ký ngay</Text> thôi</Text> :
+                    <Text>Đã có tài khoản rồi? <Text style={styles.linkText}>Đăng nhập</Text> ngay nào!</Text>
                     }
                 </View>
             </View>

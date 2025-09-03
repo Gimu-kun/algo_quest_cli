@@ -24,10 +24,18 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontFamily: 'Roboto',
     },
+    textHolder:{
+        position: 'absolute',
+        right: -30,
+        top: -20,
+        width: 90,
+        height: 90,
+        objectFit: 'contain'
+    },
     fieldContainer:{
         display: 'flex',
         flexDirection: 'column',
-        paddingVertical: 15,
+        paddingVertical: 40,
         gap: 30,
     },
     fields:{
@@ -51,6 +59,15 @@ const styles = StyleSheet.create({
     buttonTxt:{
         fontSize: 18,
         color: '#ffffff',
+    },
+    btnHolder:{
+        position: 'absolute',
+        top: -50,
+        left: 40,
+        width: 100,
+        height: 100,
+        zIndex: 5,
+        pointerEvents: 'none'
     },
     registerContainer:{
         flexDirection: 'row',

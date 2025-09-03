@@ -10,13 +10,13 @@ export const Login = () => {
     ];
 
     const fields:AuthFieldsType[] = [
-        { placeholder: "Email or Username", key: "emailOrUsername" },
-        { placeholder: "Passwords", key: "passwords" },
+        { placeholder: "Tên tài khoản", key: "emailOrUsername" },
+        { placeholder: "Mật khẩu", key: "passwords" },
     ];
 
     return (
         <AuthLayout 
-        welcomeWords="Welcome back! Glad to see you again"
+        welcomeWords="Chào mừng quay lại, chúng ta cùng tiếp tục hành trình nhé!"
         SocialMediaList={SocialMediaList} 
         isLogin={true} 
         fields={fields}/>

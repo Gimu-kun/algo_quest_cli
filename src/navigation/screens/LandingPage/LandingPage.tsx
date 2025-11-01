@@ -8,19 +8,29 @@ export const LandingPage = () => {
     const navigation = useNavigation()
     return (
         <View style={styles.pageBg}>
-            <Image style={styles.landingPic} source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/landingPic.jpeg?alt=media&token=e7e819fa-e805-4163-8602-114fb4a7b002"}}/>
+            <Image 
+                style={styles.landingPic} 
+                source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/landingPic.jpeg?alt=media&token=e7e819fa-e805-4163-8602-114fb4a7b002"}}
+            />
             <Image style={styles.logoPic} source={logoWhite}/>
-            <Button style={styles.loginBtn} mode="contained" onPress={() => navigation.navigate('HomeTabs', {
-                screen: 'Login',
-                })}>
+            
+            {/* Điều hướng trực tiếp đến màn hình Login trong RootStack */}
+            <Button 
+                style={styles.loginBtn} 
+                mode="contained" 
+                onPress={() => navigation.navigate('Login')} // Đã sửa từ 'HomeTabs' sang 'Login'
+            >
                 <Text style={{color: '#ffffff'}}>Đăng nhập</Text>
             </Button>
-            <Button style={styles.registerBtn} mode="outlined" onPress={() => navigation.navigate('HomeTabs', {
-                screen: 'Register',
-                })}>
+            
+            {/* Điều hướng trực tiếp đến màn hình Register trong RootStack */}
+            <Button 
+                style={styles.registerBtn} 
+                mode="outlined" 
+                onPress={() => navigation.navigate('Register')} // Đã sửa từ 'HomeTabs' sang 'Register'
+            >
                 <Text style={styles.registerBtn}>Đăng ký</Text>
             </Button>
         </View>
     );
 }
-

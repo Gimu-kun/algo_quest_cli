@@ -12,27 +12,11 @@ import { LandingPage } from './screens/LandingPage/LandingPage';
 import { Login } from './screens/Login/Login';
 import { Register } from './screens/Register/Register';
 import { Home } from './screens/Home/Home';
-import {Roadmap} from './screens/Roadmap/Roadmap';
 
-
+// 1. Chỉ chứa các màn hình cần Tab Bar (Ví dụ: Home, Roadmap nếu bạn muốn Tab ở dưới)
 const HomeTabs = createBottomTabNavigator({
   screens: {
-    LandingPage: {
-      screen: LandingPage,
-      options: {
-        title: 'LandingPage',
-        tabBarIcon: ({ color, size }) => (
-          <Image
-            source={newspaper}
-            tintColor={color}
-            style={{
-              width: size,
-              height: size,
-            }}
-          />
-        ),
-      },
-    },
+    // Chỉ giữ Home trong Tab Navigator
     Home: {
       screen: Home,
       options: {
@@ -49,55 +33,49 @@ const HomeTabs = createBottomTabNavigator({
         ),
       },
     },
-    Register: {  
-      screen: Register,
-      options: {
-        tabBarIcon: ({ color, size }) => (
-          <Image
-            source={bell}
-            tintColor={color}
-            style={{
-              width: size,
-              height: size,
-            }}
-          />
-        ),
-      },
-    },
-    Login: {  
-      screen: Login,
-      options: {
-        tabBarIcon: ({ color, size }) => (
-          <Image
-            source={bell}
-            tintColor={color}
-            style={{
-              width: size,
-              height: size,
-            }}
-          />
-        ),
-      },
-    },
   },
 });
 
 const RootStack = createNativeStackNavigator({
   screens: {
+    // 2. Đặt LandingPage làm màn hình đầu tiên và không có header
+    LandingPage: {
+      screen: LandingPage,
+      options: {
+        title: 'LandingPage',
+        headerShown: false,
+      },
+    },
+    // 3. Đặt Login và Register trực tiếp trong RootStack, không có Tab Bar
+    Login: {
+      screen: Login,
+      options: {
+        title: 'Login',
+        headerShown: false,
+      },
+    },
+    Register: {
+      screen: Register,
+      options: {
+        title: 'Register',
+        headerShown: false,
+      },
+    },
+    // 4. Màn hình chứa Tab Navigator (chỉ Home và các màn hình khác cần Tab mới nằm trong đây)
     HomeTabs: {
       screen: HomeTabs,
       options: {
-        title: 'Home',
-        headerShown: false,
+        headerShown: false, // Ẩn Stack Header cho HomeTabs, chỉ hiển thị Tab Bar
       },
     },
-    Roadmap: {
-      screen: Roadmap,
-      options: {
-        title: 'Roadmap',
-        headerShown: false,
-      },
-    },
+    // Nếu bạn muốn Roadmap nằm ngoài Tab Bar nhưng vẫn là một màn hình riêng biệt trong Stack
+    // Roadmap: {
+    //   screen: Roadmap,
+    //   options: {
+    //     title: 'Roadmap',
+    //     headerShown: false,
+    //   },
+    // },
   },
 });
 

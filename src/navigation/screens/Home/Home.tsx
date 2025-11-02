@@ -9,14 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../../../ApiConfig";
+import { UserInfo } from "../../../types/userType";
 
-interface UserInfo {
-    userId: number;
-    username: string;
-    fullName: string; 
-    avatar: string;
-    role: string;
-}
+
 
 export const Home = () => {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);

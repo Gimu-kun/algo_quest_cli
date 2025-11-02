@@ -7,6 +7,8 @@ import { QuestSummary } from "../../../types/QuestType";
 import { BASE_API_URL, BASE_URL } from "../../../ApiConfig";
 import { Coordinate, MAP_COORDINATES } from "../../../constants/MapCoords";
 import { TopicSummary } from "../../../types/TopicType";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserInfo } from "../../../types/userType";
 
 type RootStackParamList = {
         Roadmap: { topicId: number | string };
@@ -42,6 +44,7 @@ export const Roadmap :React.FC = () => {
     const height = useWindowDimensions();
     const route = useRoute<RoadmapRouteProp>();
     const initialTopicId = route.params?.topicId ? Number(route.params.topicId) : undefined;
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [topicId,setTopicId] = useState<number | undefined>(initialTopicId);
     const [mapUri , setMapUri] = useState<string>(getMapBackground(topicId));
     const [mapPath , setMapPath] = useState<Coordinate[]>(getMapPath(topicId));
@@ -53,6 +56,8 @@ export const Roadmap :React.FC = () => {
     const [topicName , setTopicName] = useState<string | null>(null);
     const [preTopicName , setPreTopicName] = useState<string | null>(null);
     const [nextTopicName , setNextTopicName] = useState<string | null>(null);
+
+    const [completedQuestIds, setCompletedQuestIds] = useState<Set<number>>(new Set());
 
     const renderQuestNodes = () => {
         if (!quests || quests.length === 0 || mapPath.length === 0) {
@@ -70,13 +75,17 @@ export const Roadmap :React.FC = () => {
             easy: { primary: '#66BB6A', shadow: '#388E3C' }, // Xanh lá
             medium: { primary: '#FFD54F', shadow: '#FFA000' }, // Vàng/Cam
             hard: { primary: '#EF5350', shadow: '#D32F2F' }, // Đỏ
+            completed: { primary: '#7986CB', shadow: '#3F51B5' }, // Màu Tím
         };
 
         return sortedQuests.map((quest, index) => {   
             const coordIndex = Math.min(index, mapPath.length - 1); 
             const position = mapPath[coordIndex];
+            const isCompleted = completedQuestIds.has(quest.questId);
             
-            const colors = colorPalette[quest.difficulty as keyof typeof colorPalette] || colorPalette.easy;
+            const colors = isCompleted 
+                ? colorPalette.completed 
+                : (colorPalette[quest.difficulty as keyof typeof colorPalette] || colorPalette.easy);
                 
             return (
                 // Nút quest đặt trên bản đồ
@@ -137,15 +146,82 @@ export const Roadmap :React.FC = () => {
                         }}>
                             {quest.orderIndex}
                         </Text>
+                        {/* ICON HOÀN THÀNH */}
+                        {isCompleted && (
+                            <View 
+                                style={{
+                                    position: 'absolute',
+                                    top: -5, // Căn chỉnh vị trí
+                                    right: -5,
+                                    borderColor: '#66BB6A',
+                                    borderWidth:2,
+                                    borderRadius:'50%',
+                                    backgroundColor:'#FFFFFF'
+                                }}
+                            >
+                                <Icon 
+                                    color='#66BB6A' 
+                                    size={20} 
+                                    source="check-circle" 
+                                />
+                            </View>
+                        )}
                     </View>
-                    
                 </TouchableOpacity>
             );
         });
     };
 
+    const fetchUserInfo = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('authData');
+
+            if (jsonValue !== null) {
+                const authData = JSON.parse(jsonValue);
+                const userData = authData.user;
+                setUserInfo({
+                    userId: userData.userId,
+                    username: userData.username,
+                    fullName: userData.fullName || userData.username, 
+                    avatar: userData.avatar,
+                    role: userData.role,
+                });
+            }
+        } catch (e) {
+            console.error("Lỗi khi đọc AsyncStorage:", e);
+        }
+    };
+
     const handleGoBack = () => {
         navigation.goBack();
+    };
+
+    const fetchQuestCompletions = async (userId: number, topicId: number | string) => {
+        const apiUrl = `${BASE_API_URL}quest-completions/user/${userId}/topic/${topicId}`;
+        
+        try {
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                // Nếu không có quest nào hoàn thành (404) hoặc lỗi khác
+                if (response.status === 404) {
+                     setCompletedQuestIds(new Set()); // Đặt là rỗng
+                     return;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data: any[] = await response.json();
+            console.log("data-----------------------------------------------------");
+            console.log(data);
+            // Lọc và lưu trữ các Quest ID duy nhất đã hoàn thành
+            const questIds = new Set(data.map(completion => completion.quest.questId as number));
+            setCompletedQuestIds(questIds);
+        } catch (err) {
+            console.error("[API Error] Lỗi khi tải thông tin hoàn thành Quest:", err);
+            // Vẫn cho phép map tải, chỉ báo lỗi nhẹ
+            setCompletedQuestIds(new Set()); 
+        }
     };
 
     const fetchQuestsSummary = async (id: number | string) => {
@@ -206,6 +282,10 @@ export const Roadmap :React.FC = () => {
     }
 
     useEffect(() => {
+        fetchUserInfo();
+    }, []);
+
+    useEffect(() => {
         if (topicId) {
             setIsMapLoaded(false);
             setMapUri(getMapBackground(topicId));
@@ -217,6 +297,13 @@ export const Roadmap :React.FC = () => {
             setError("Thiếu Topic ID.");
         }
     }, [topicId]);
+
+    useEffect(() => {
+        if (topicId && userInfo?.userId) {
+            console.log(`Đang gọi API hoàn thành cho User ID: ${userInfo.userId} và Topic ID: ${topicId}`);
+            fetchQuestCompletions(userInfo.userId, topicId);
+        }
+    }, [topicId, userInfo]);
 
     if (loading || isMapLoaded) {
         return (

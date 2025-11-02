@@ -61,15 +61,13 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 100,
         bottom: 30,
-        paddingHorizontal: 20
+        paddingHorizontal: 5
     },
     footerTop:{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         width:'100%',
     },
     sectionNavBtn:{
+        position: 'absolute',
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -78,10 +76,19 @@ const styles = StyleSheet.create({
         borderRadius:15,
         padding:5
     },
+    nextBtn:{
+        left:'0%'
+    },
+    preBtn:{
+        right:'0%'
+    },
     sectionNavBtnTxt:{
         paddingHorizontal: 4,
         color: '#f20717',
-        fontSize: 15
+        fontSize: 12
+    },
+    hidden:{
+        display:"none"
     }
 })
 

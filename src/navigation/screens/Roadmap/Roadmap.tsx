@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { QuestSummary } from "../../../types/QuestType";
 import { BASE_API_URL, BASE_URL } from "../../../ApiConfig";
 import { Coordinate, MAP_COORDINATES } from "../../../constants/MapCoords";
+import { TopicSummary } from "../../../types/TopicType";
 
 type RootStackParamList = {
         Roadmap: { topicId: number | string };
@@ -19,20 +20,17 @@ const MAP_BACKGROUNDS = [
     `${BASE_URL}/uploads/maps/map5.png`,
 ];
 
-const getMapBackground = (topicId: number | string): string => {
+const getMapBackground = (topicId: number | string | undefined): string => {
+    if (topicId === undefined) return MAP_BACKGROUNDS[0];
     const id = typeof topicId === 'string' ? parseInt(topicId) : topicId;
     const index = (id - 1) % MAP_BACKGROUNDS.length;
     return MAP_BACKGROUNDS[index >= 0 ? index : 0]; 
 };
 
-const getMapPath = (topicId: number | string): Coordinate[] => {
+const getMapPath = (topicId: number | string | undefined): Coordinate[] => {
+    if (topicId === undefined) return [];
     const id = typeof topicId === 'string' ? parseInt(topicId) : topicId;
-    
-    // Sử dụng Modulo (%) để lặp lại map khi vượt quá số lượng 5
-    // index = (id - 1) % 5, sau đó tìm mapId tương ứng
     const mapIndex = (id - 1) % MAP_COORDINATES.length;
-    
-    // Sử dụng mapIndex để lấy path
     return MAP_COORDINATES[mapIndex] ? MAP_COORDINATES[mapIndex].path : [];
 };
 
@@ -43,16 +41,18 @@ export const Roadmap :React.FC = () => {
     const navigation = useNavigation<RoadmapNavigationProp>();
     const height = useWindowDimensions();
     const route = useRoute<RoadmapRouteProp>();
-    const { topicId } = route.params;
-    const mapUri = getMapBackground(topicId);
-    const mapPath = getMapPath(topicId);
+    const initialTopicId = route.params?.topicId ? Number(route.params.topicId) : undefined;
+    const [topicId,setTopicId] = useState<number | undefined>(initialTopicId);
+    const [mapUri , setMapUri] = useState<string>(getMapBackground(topicId));
+    const [mapPath , setMapPath] = useState<Coordinate[]>(getMapPath(topicId));
+    const [topicsSummary, setTopicSummary] = useState<TopicSummary[]>([]);
     const [quests, setQuests] = useState<QuestSummary[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(()=>{
-        console.log("mapUri",mapUri)
-    },[mapUri])
+    const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false);
+    const [topicName , setTopicName] = useState<string | null>(null);
+    const [preTopicName , setPreTopicName] = useState<string | null>(null);
+    const [nextTopicName , setNextTopicName] = useState<string | null>(null);
 
     const renderQuestNodes = () => {
         if (!quests || quests.length === 0 || mapPath.length === 0) {
@@ -64,7 +64,6 @@ export const Roadmap :React.FC = () => {
 
         // CÁC THAM SỐ CHUNG CHO NÚT
         const NODE_SIZE = 55; // Kích thước tổng thể của nút
-        const DEPTH_OFFSET = 3; // Độ lệch (offset) để tạo bóng đổ
         
         // Bảng màu cho hiệu ứng 3D dựa trên Difficulty
         const colorPalette = {
@@ -150,7 +149,6 @@ export const Roadmap :React.FC = () => {
     };
 
     const fetchQuestsSummary = async (id: number | string) => {
-        setLoading(true);
         setError(null);
         
         const apiUrl = `${BASE_API_URL}topics/${id}/quests/summary`;
@@ -163,14 +161,10 @@ export const Roadmap :React.FC = () => {
             }
 
             const data: QuestSummary[] = await response.json();
-            
-            console.log("[API Success] Dữ liệu Quest đã tải:"); 
             console.log(data);
-            
             setQuests(data);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định";
-            console.error("[API Error] Lỗi khi tải dữ liệu Quest:", errorMessage);
             Alert.alert("Lỗi", "Không thể tải danh sách Quest. Vui lòng kiểm tra server.");
             setError(errorMessage);
         } finally {
@@ -178,16 +172,53 @@ export const Roadmap :React.FC = () => {
         }
     };
 
+    const fetchTopicSummary = async () => {
+        setError(null);
+        
+        const apiUrl = `${BASE_API_URL}topics/summary`;
+
+        try {
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data: TopicSummary[] = await response.json();
+            setTopicSummary(data);
+
+            const currentTopic = data.find(item => item.topicId === topicId);
+            if (currentTopic) {
+                setTopicName(currentTopic.topicName);
+                const preTopic = data.find(item => item .orderIndex == currentTopic?.orderIndex-1)
+                setPreTopicName(preTopic ? preTopic.topicName : null);
+                const nextTopic = data.find(item => item .orderIndex == currentTopic?.orderIndex+1)
+                setNextTopicName(nextTopic ? nextTopic.topicName : null);
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định";
+            console.error("[API Error] Lỗi khi tải dữ liệu Topic:", errorMessage);
+            Alert.alert("Lỗi", "Không thể tải danh sách Topic. Vui lòng kiểm tra server.");
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
         if (topicId) {
+            setIsMapLoaded(false);
+            setMapUri(getMapBackground(topicId));
+            setMapPath(getMapPath(topicId))
             fetchQuestsSummary(topicId);
+            fetchTopicSummary();
         } else {
             console.error("Không tìm thấy topicId trong route params.");
             setError("Thiếu Topic ID.");
         }
     }, [topicId]);
 
-    if (loading && quests.length === 0) {
+    if (loading || isMapLoaded) {
         return (
             <View style={[styles.page, { justifyContent: 'center', alignItems: 'center' }]}>
                 <Text>Đang tải danh sách Quest...</Text>
@@ -203,6 +234,30 @@ export const Roadmap :React.FC = () => {
             </View>
         );
     }
+
+    const handlePreTopic = () =>{
+        const topic = topicsSummary.find(item=>item.topicId == topicId);
+        if (!topic || topic.orderIndex == 1) {
+            return;
+        }
+        const preTopic = topicsSummary.find(item=>item.orderIndex == topic.orderIndex - 1);
+        if (preTopic) {
+            setIsMapLoaded(true)
+            setTopicId(preTopic.topicId); 
+        }
+    }
+
+    const handleNextTopic = () =>{
+        const topic = topicsSummary.find(item=>item.topicId == topicId);
+        if (!topic || topic.orderIndex == topicsSummary.length) {
+            return;
+        }
+        const nextTopic = topicsSummary.find(item=>item.orderIndex == topic.orderIndex + 1);
+        if (nextTopic) {
+            setIsMapLoaded(true)
+            setTopicId(nextTopic.topicId); 
+        }
+    }
     
     return (
         <View style={[styles.page]}>
@@ -211,7 +266,7 @@ export const Roadmap :React.FC = () => {
                     <IconButton iconColor='#f20717' size={45} icon="arrow-left-thick" onPress={handleGoBack}/>
                     <View style={styles.headerTitleContainer}>
                         <Image style={styles.headerTitleRibbon}  source={require('../../../assets/ribbon.png')}/>
-                        <Text style={styles.headerTitle}>Màn 1</Text>
+                        <Text style={styles.headerTitle}>{topicName}</Text>
                     </View>
                     <IconButton iconColor='#f20717' size={45} icon="cog"/>
                 </View>
@@ -220,19 +275,30 @@ export const Roadmap :React.FC = () => {
                 source={{ uri: mapUri }}
                 style={{ flex: 1, width: '100%', height: '100%' }} 
                 imageStyle={{ resizeMode: 'cover' }}
+                onLoadEnd={() => setIsMapLoaded(false)}
             >
-                    <View style={{ flex: 1 }}> 
-                        {renderQuestNodes()}
-                    </View>
+                    {!isMapLoaded && (
+                        <View style={{ flex: 1 }}> 
+                            {renderQuestNodes()}
+                        </View>
+                    )}
             </ImageBackground>
             <View style={styles.footer}>
                 <View style={styles.footerTop}>
-                    <TouchableOpacity style={styles.sectionNavBtn}>
+                    <TouchableOpacity style={[
+                        styles.sectionNavBtn, 
+                        styles.nextBtn,
+                        preTopicName === null && styles.hidden
+                    ]} onPress={handlePreTopic}>
                         <Icon color='#f20717' size={45} source="arrow-left-thick"/>
-                        <Text style={styles.sectionNavBtnTxt}>Màn trước</Text>
+                        <Text style={styles.sectionNavBtnTxt}>{preTopicName}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.sectionNavBtn}>
-                        <Text style={styles.sectionNavBtnTxt}>Màn sau</Text>
+                    <TouchableOpacity style={[
+                        styles.sectionNavBtn, 
+                        styles.preBtn,
+                        nextTopicName === null && styles.hidden
+                    ]} onPress={handleNextTopic}>
+                        <Text style={styles.sectionNavBtnTxt}>{nextTopicName}</Text>
                         <Icon color='#f20717' size={45} source="arrow-right-thick"/>
                     </TouchableOpacity>
                 </View>

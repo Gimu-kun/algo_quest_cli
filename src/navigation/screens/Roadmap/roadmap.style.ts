@@ -74,12 +74,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor:"#ffffffef",
+        borderRadius:15,
+        padding:5
     },
     sectionNavBtnTxt:{
-        borderLeftWidth: 3,
-        borderLeftColor: '#f20717',
-        borderRightWidth: 3,
-        borderRightColor: '#f20717',
         paddingHorizontal: 4,
         color: '#f20717',
         fontSize: 15

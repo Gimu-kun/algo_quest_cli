@@ -39,26 +39,21 @@ export const Login: React.FC = () => {
         }
 
         try {
-            // Chú ý: Cần kiểm tra key 'password' trong body có đúng không.
-            // Tôi giả định API backend nhận { username: ..., password: ... }
             const dataToSend = {
                 username: emailOrUsername, 
                 password: passwords, 
             };
 
-            // Gọi API
             const response = await axios.post(LOGIN_URL, dataToSend);
 
             if (response.data && response.data.token) {
-                const token: string = response.data.token;
-
-                // 3. LƯU TOKEN VÀO ASYNC STORAGE
-                await AsyncStorage.setItem('userToken', token);
+                const authData = response.data;
+                await AsyncStorage.setItem('authData', JSON.stringify(authData));
                 
                 Alert.alert("Thành công", "Đăng nhập thành công!");
-                
-                // 4. ĐIỀU HƯỚNG ĐẾN HOME TABS
-                navigation.navigate('HomeTabs'); 
+                setTimeout(()=>{
+                    navigation.navigate('HomeTabs'); 
+                },500)
             } else {
                 Alert.alert("Lỗi Đăng nhập", "Phản hồi API không hợp lệ.");
             }

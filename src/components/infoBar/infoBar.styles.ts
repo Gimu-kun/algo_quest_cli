@@ -78,5 +78,20 @@ export const styles = StyleSheet.create({
         padding: 5,
         borderRadius:'50%',
         backgroundColor: '#ffffff3e'
-    }
+    },
+    logoutButton: {
+        backgroundColor: '#e74c3c', // Màu nền đỏ cho nút
+        borderRadius: 5,
+        padding: 0,
+        marginLeft: 10,
+        height: 30, // Chiều cao phù hợp
+        width: 30,  // Chiều rộng phù hợp
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    logoutIcon: {
+        margin: 0,
+        width: 30,
+        height: 30,
+    },
 })

@@ -12,6 +12,7 @@ import { LandingPage } from './screens/LandingPage/LandingPage';
 import { Login } from './screens/Login/Login';
 import { Register } from './screens/Register/Register';
 import { Home } from './screens/Home/Home';
+import { Roadmap } from './screens/Roadmap/Roadmap';
 
 // 1. Chỉ chứa các màn hình cần Tab Bar (Ví dụ: Home, Roadmap nếu bạn muốn Tab ở dưới)
 const HomeTabs = createBottomTabNavigator({
@@ -68,14 +69,13 @@ const RootStack = createNativeStackNavigator({
         headerShown: false, // Ẩn Stack Header cho HomeTabs, chỉ hiển thị Tab Bar
       },
     },
-    // Nếu bạn muốn Roadmap nằm ngoài Tab Bar nhưng vẫn là một màn hình riêng biệt trong Stack
-    // Roadmap: {
-    //   screen: Roadmap,
-    //   options: {
-    //     title: 'Roadmap',
-    //     headerShown: false,
-    //   },
-    // },
+    Roadmap: {
+       screen: Roadmap,
+       options: {
+         title: 'Roadmap',
+         headerShown: false,
+       },
+     },
   },
 });
 

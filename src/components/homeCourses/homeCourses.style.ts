@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 5,
         marginHorizontal: 15,
-        padding: 10,
       },
       image: {
         width: "100%",
@@ -45,13 +44,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         overflow:'hidden'
       },
-      markBox:{
-        display:'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width:'100%',
-        height: 'auto',
-      },
       courseRole:{
         display: 'flex',
         backgroundColor: '#eeeeee',
@@ -59,7 +51,7 @@ const styles = StyleSheet.create({
         alignItems:'center',
         borderRadius:50,
         width: 80,
-        padding: 5
+        padding: 10
       },
       courseRoleTxt:{
         fontSize:11
@@ -72,8 +64,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 50,
         borderColor:'red',
-        paddingVertical: 2,
-        paddingHorizontal: 5
+        paddingVertical: 10,
+        paddingHorizontal: 10
       },
       courseRankTxt:{
         fontSize:11,
@@ -97,7 +89,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         backgroundColor: '#f20717',
         borderRadius: 10,
-        columnGap: 5
+        columnGap: 5,
+        margin:10
       },
       navigateBtnTxt:{
         fontSize:18,
@@ -111,7 +104,43 @@ const styles = StyleSheet.create({
         height: 100,
         zIndex: 5,
         pointerEvents: 'none'
-      }
+      },
+      markBox:{
+        display:'flex',
+        position:'absolute',
+        top: 0,
+        left: 0,
+        backgroundColor:'#00000088', // Màu đen trong suốt
+        justifyContent:'center',
+        alignItems:'center',
+        padding: 10,
+        borderBottomRightRadius: 10,
+        borderTopLeftRadius: 10,
+      },
+      
+      // Style cho chữ bên trong markBox
+      markTxt:{
+          fontSize:14,
+          fontWeight: "bold",
+          color: '#fff',
+        },
+
+      // Style cho hộp chứa tất cả thông tin dưới ảnh (bao gồm title, info, buttons)
+      infoBox: {
+          display: 'flex',
+          gap: 10,
+          paddingHorizontal: 5
+      },
+
+      // Style cho hàng chứa vai trò (courseRole) và xếp hạng (courseRank)
+      titleInfo:{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width:'100%',
+          height: 'auto',
+        },
 })
 
 export default styles;

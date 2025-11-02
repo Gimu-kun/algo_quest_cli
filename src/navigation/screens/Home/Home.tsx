@@ -1,13 +1,53 @@
-import { View , Animated } from "react-native";
+import { View , Animated, TouchableOpacity, Text, StyleSheet } from "react-native";
 import HomeCarousel from "../../../components/homeCarousel/HomeCarousel";
 import InfoBar from "../../../components/infoBar/InfoBar";
 import HomeCourses from "../../../components/homeCourses/HomeCourses";
 import styles from "./home.style";
 import HomeCategories from "../../../components/homeCategories/HomeCategories";
 import { cateItemsType } from "../../../types/cateItemsType";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../../../ApiConfig";
+
+interface UserInfo {
+    userId: number;
+    username: string;
+    fullName: string; 
+    avatar: string;
+    role: string;
+}
 
 export const Home = () => {
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const navigation = useNavigation<any>();
+
+    const fetchUserInfo = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('authData');
+
+            if (jsonValue !== null) {
+                // Phân tích chuỗi JSON thành đối tượng { user: {...}, token: "..." }
+                const authData = JSON.parse(jsonValue);
+                const userData = authData.user;
+                // Cập nhật state với thông tin người dùng cần hiển thị
+                setUserInfo({
+                    userId: userData.userId,
+                    username: userData.username,
+                    fullName: userData.fullName || userData.username, // Hiển thị tên đầy đủ
+                    avatar: userData.avatar,
+                    role: userData.role,
+                });
+            }
+        } catch (e) {
+            console.error("Lỗi khi đọc AsyncStorage:", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserInfo();
+    }, []);
+    
     const courseItemsData: cateItemsType[] = [
         {
             id: 1,
@@ -86,10 +126,30 @@ export const Home = () => {
         outputRange: [1, 0],   // opacity từ 1 -> 0
         extrapolate: 'clamp',  // không cho vượt quá 0 hoặc 1
     });
+
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.removeItem('authData');
+            setUserInfo(null);
+            navigation.replace('Login');
+        } catch (e) {
+            console.error("Lỗi khi đăng xuất:", e);
+        }
+    };
+
+    
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.page}>
-                <InfoBar />
+                {userInfo && (
+                    <InfoBar 
+                        // TRUYỀN PROPS VÀO InfoBar
+                        fullName={userInfo.fullName} 
+                        // Ghép URL đầy đủ cho Avatar
+                        avatarUrl={`${BASE_URL}${userInfo.avatar}`} 
+                        onLogout={handleLogout} // Truyền hàm Đăng xuất
+                    />
+                )}
                 <Animated.View style={[styles.pageRound,{opacity: fadeOut}]} />
                 <Animated.ScrollView 
                 contentContainerStyle={styles.container}

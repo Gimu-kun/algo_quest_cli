@@ -1,17 +1,23 @@
-import { View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import {styles} from './infoBar.styles'
 import { Avatar, IconButton } from 'react-native-paper';
 import { Text } from 'react-native-paper';
 
-const InfoBar = () => {
+interface InfoBarProps {
+    fullName: string;
+    avatarUrl: string;
+    onLogout: () => void;
+}
+
+const InfoBar = ({ fullName, avatarUrl, onLogout }: InfoBarProps) => {
     return(
         <View style={styles.infoBar}>
             <View style={styles.infoBox}>
                 <View style={styles.avatarBox}>
-                    <Avatar.Image size={55} source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/avatar.jpeg?alt=media&token=d3b66e5d-2143-47ea-bc3a-29a7f3956f43"}} />
+                    <Avatar.Image size={55} source={{ uri: avatarUrl }} />
                 </View>
                 <View>
-                    <Text style={styles.accName} variant="labelLarge">Nghiem Le</Text>
+                    <Text style={styles.accName} variant="labelLarge">{fullName}</Text>
                     <View style={styles.toolBox}>
                         <IconButton
                             icon="fire"
@@ -36,6 +42,18 @@ const InfoBar = () => {
                             size={25}
                             onPress={() => console.log('Pressed')}
                         />
+                        <View style={styles.toolLine}/>
+                        <TouchableOpacity 
+                            onPress={onLogout} // <-- Gọi hàm Đăng xuất
+                            style={styles.logoutButton} // <-- Style mới
+                        >
+                            <IconButton
+                                icon="logout"
+                                iconColor="#fff" // Màu trắng cho icon Đăng xuất
+                                style={styles.logoutIcon}
+                                size={20}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>

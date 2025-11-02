@@ -98,10 +98,11 @@ export const Register: React.FC = () => {
                 },
             });
 
+            
             Alert.alert("Thành công", "Đăng ký thành công! Mời bạn đăng nhập.");
-
-            navigation.navigate('Login');
-
+            setTimeout(()=>{
+                navigation.navigate('Login');
+            },500)
         } catch (error) {
         } finally {
             setLoading(false);
@@ -141,7 +142,9 @@ export const Register: React.FC = () => {
                         />
                     )}
                     <TouchableOpacity onPress={handlePickImage} style={styles.avatarButton}>
-                            Chọn Avatar
+                            <Text>
+                                Chọn Avatar
+                            </Text>
                     </TouchableOpacity>
                 </View>
             }

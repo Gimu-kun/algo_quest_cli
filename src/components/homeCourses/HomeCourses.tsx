@@ -102,8 +102,8 @@ const HomeCourses = () => {
               <Text style={styles.title} numberOfLines={1}>{item.topicName}</Text>
               <View>
                 {/* Thông tin thêm, ví dụ: số lượng Quest */}
-                <Text style={styles.subTitle}><Icon size={14} source={'text-box-multiple'}/> Quests: Đang cập nhật</Text> 
-                <Text style={styles.subTitle}><Icon size={14} source={'calendar'}/> Index: {item.questCount}</Text>
+                <Text style={styles.subTitle}><Icon size={25} source={'text-box-multiple'}/> Trạng thái: Đang cập nhật</Text> 
+                <Text style={styles.subTitle}><Icon size={25} source={'calendar'}/> Tổng số màn chơi: {item.questCount}</Text>
               </View>
               <TouchableOpacity style={styles.navigateBtn} onPress={()=>{navigation.navigate('Roadmap', { topicId: item.topicId })}}>
                 <Image style={styles.btnHolder} source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/btn_hold-removebg-preview.png?alt=media&token=0973f18d-bcc8-45fc-84ab-ecac7da3c1d5"}}/>
@@ -141,8 +141,8 @@ const HomeCourses = () => {
             {courseData.length > 0 ? (
                 <Carousel
                     loop={false}
-                    width={width * 0.9}
-                    height={400}
+                    width={width}
+                    height={430}
                     autoPlay={false}
                     data={courseData}
                     scrollAnimationDuration={1000}

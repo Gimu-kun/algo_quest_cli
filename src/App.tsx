@@ -6,6 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
 import { useColorScheme } from 'react-native';
 import { Navigation } from './navigation';
+import Toast from 'react-native-toast-message';
+import { PaperProvider } from 'react-native-paper';
 
 Asset.loadAsync([
   ...NavigationAssets,
@@ -23,15 +25,18 @@ export function App() {
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme
 
   return (
-    <Navigation
-      theme={theme}
-      linking={{
-        enabled: 'auto',
-        prefixes: [prefix],
-      }}
-      onReady={() => {
-        SplashScreen.hideAsync();
-      }}
-    />
+    <PaperProvider>
+      <Navigation
+        theme={theme}
+        linking={{
+          enabled: 'auto',
+          prefixes: [prefix],
+        }}
+        onReady={() => {
+          SplashScreen.hideAsync();
+        }}
+      />
+      <Toast />
+    </PaperProvider>
   );
 }

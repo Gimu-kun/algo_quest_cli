@@ -7,6 +7,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { LOGIN_URL } from '../../../ApiConfig';
+import Toast from 'react-native-toast-message';
 
 // Khai báo kiểu cho dữ liệu đăng nhập
 interface LoginCredentials {
@@ -50,7 +51,11 @@ export const Login: React.FC = () => {
                 const authData = response.data;
                 await AsyncStorage.setItem('authData', JSON.stringify(authData));
                 
-                Alert.alert("Thành công", "Đăng nhập thành công!");
+                Toast.show({
+                    type: 'success', // 'info' | 'error'
+                    text1: 'Thành công!',
+                    text2: 'Bạn đã đăng nhập thành công 👋',
+                });
                 setTimeout(()=>{
                     navigation.navigate('HomeTabs'); 
                 },500)

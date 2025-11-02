@@ -7,4 +7,12 @@ interface TopicSummary {
   questCount: number;
 }
 
-export type {TopicSummary}
+interface TopicMinimal {
+    topicId: number;
+    topicName: string;
+    description: string;
+    orderIndex: number;
+    quests: string[]; 
+}
+
+export type {TopicSummary,TopicMinimal}

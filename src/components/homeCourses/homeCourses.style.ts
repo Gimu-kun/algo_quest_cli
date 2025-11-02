@@ -35,7 +35,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.4,
         shadowRadius: 2,
         elevation: 5,
-        marginHorizontal: 15,
       },
       image: {
         width: "100%",
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
         padding: 10
       },
       courseRoleTxt:{
-        fontSize:11
+        fontSize:14
       },
       courseRank:{
         display: 'flex',
@@ -68,16 +67,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10
       },
       courseRankTxt:{
-        fontSize:11,
+        fontSize:14,
         color: 'red',
       },
       title: {
         marginTop: 10,
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: "600",
       },
       subTitle: {
-        fontSize: 14,
+        fontSize: 18,
         color: "#888",
         marginTop: 4,
       },
@@ -90,7 +89,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f20717',
         borderRadius: 10,
         columnGap: 5,
-        margin:10
+        marginVertical:10
       },
       navigateBtnTxt:{
         fontSize:18,
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
       infoBox: {
           display: 'flex',
           gap: 10,
-          paddingHorizontal: 5
+          paddingHorizontal: 15
       },
 
       // Style cho hàng chứa vai trò (courseRole) và xếp hạng (courseRank)

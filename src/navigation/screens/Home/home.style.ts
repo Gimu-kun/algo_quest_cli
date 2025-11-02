@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
     page: {
         alignItems: 'center',
-        width: '100%'
+        width: '100%',
     },
     pageRound: {
         position: 'absolute',

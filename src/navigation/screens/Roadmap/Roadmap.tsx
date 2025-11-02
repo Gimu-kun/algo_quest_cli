@@ -3,15 +3,16 @@ import styles from "./roadmap.style";
 import { Icon, IconButton } from "react-native-paper";
 import { NavigationProp, RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { QuestSummary } from "../../../types/QuestType";
+import { QuestDetail, QuestStats, QuestStatus } from "../../../types/QuestType"; // Giả định QuestStatus là DTO mới
 import { BASE_API_URL, BASE_URL } from "../../../ApiConfig";
 import { Coordinate, MAP_COORDINATES } from "../../../constants/MapCoords";
 import { TopicSummary } from "../../../types/TopicType";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserInfo } from "../../../types/userType";
+import { QuestStatsModal } from "../../../components/questStatsModal/QuestStatsModal";
 
 type RootStackParamList = {
-        Roadmap: { topicId: number | string };
+    Roadmap: { topicId: number | string };
 };
 
 const MAP_BACKGROUNDS = [
@@ -49,15 +50,16 @@ export const Roadmap :React.FC = () => {
     const [mapUri , setMapUri] = useState<string>(getMapBackground(topicId));
     const [mapPath , setMapPath] = useState<Coordinate[]>(getMapPath(topicId));
     const [topicsSummary, setTopicSummary] = useState<TopicSummary[]>([]);
-    const [quests, setQuests] = useState<QuestSummary[]>([]);
+    const [quests, setQuests] = useState<QuestStatus[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false);
     const [topicName , setTopicName] = useState<string | null>(null);
     const [preTopicName , setPreTopicName] = useState<string | null>(null);
     const [nextTopicName , setNextTopicName] = useState<string | null>(null);
-
-    const [completedQuestIds, setCompletedQuestIds] = useState<Set<number>>(new Set());
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+    const [selectedQuestStats, setSelectedQuestStats] = useState<QuestStats | null>(null);
+    const [currentSelectedQuestId, setCurrentSelectedQuestId] = useState<number | null>(null);
 
     const renderQuestNodes = () => {
         if (!quests || quests.length === 0 || mapPath.length === 0) {
@@ -75,17 +77,31 @@ export const Roadmap :React.FC = () => {
             easy: { primary: '#66BB6A', shadow: '#388E3C' }, // Xanh lá
             medium: { primary: '#FFD54F', shadow: '#FFA000' }, // Vàng/Cam
             hard: { primary: '#EF5350', shadow: '#D32F2F' }, // Đỏ
-            completed: { primary: '#7986CB', shadow: '#3F51B5' }, // Màu Tím
+            completed: { primary: '#7986CB', shadow: '#3F51B5' }, // Màu Tím (Hoàn thành)
+            locked: { primary: '#B0BEC5', shadow: '#78909C' }, // Màu Xám (Khóa)
         };
 
-        return sortedQuests.map((quest, index) => {   
+        return sortedQuests.map((quest, index) => { 
             const coordIndex = Math.min(index, mapPath.length - 1); 
             const position = mapPath[coordIndex];
-            const isCompleted = completedQuestIds.has(quest.questId);
             
-            const colors = isCompleted 
-                ? colorPalette.completed 
-                : (colorPalette[quest.difficulty as keyof typeof colorPalette] || colorPalette.easy);
+            // LẤY TRẠNG THÁI TỪ DỮ LIỆU MỚI (QuestStatus DTO)
+            const isCompleted = quest.completed; 
+            const isLocked = quest.locked; 
+            
+            // TÍNH TOÁN BẢNG MÀU VÀ HIỆU ỨNG THỊ GIÁC
+            let colors: { primary: string, shadow: string };
+            let nodeOpacity = 1;
+
+            if (isLocked) {
+                colors = colorPalette.locked; // Áp dụng màu xám
+                nodeOpacity = 0.9; // Giảm độ mờ 
+            } else if (isCompleted) {
+                colors = colorPalette.completed;
+            } else {
+                // Lấy màu dựa trên difficulty nếu chưa hoàn thành và chưa bị khóa
+                colors = (colorPalette[quest.difficulty as keyof typeof colorPalette] || colorPalette.easy);
+            }
                 
             return (
                 // Nút quest đặt trên bản đồ
@@ -101,10 +117,15 @@ export const Roadmap :React.FC = () => {
                         height: NODE_SIZE + 10,
                         justifyContent: 'center',
                         alignItems: 'center',
+                        // Áp dụng độ mờ (opacity) cho toàn bộ nút khi bị khóa
+                        opacity: nodeOpacity, 
                     }}
+                    // VÔ HIỆU HÓA TƯƠNG TÁC
+                    disabled={isLocked} // KHÔNG CHO BẤM NẾU isLocked là true
                     onPress={() => {
-                        console.log(`Bắt đầu Quest: ${quest.questName}`);
-                        // Logic điều hướng...
+                        // --- CẬP NHẬT LOGIC onPress MỚI ---
+                        handleQuestPress(quest.questId, isLocked, quest.questName);
+                        // --- END CẬP NHẬT ---
                     }}
                 >
                     {/* 1. LAYER DƯỚI: TẠO BÓNG VÀ CHIỀU SÂU (DEPTH) */}
@@ -112,7 +133,7 @@ export const Roadmap :React.FC = () => {
                         position: 'absolute',
                         width: NODE_SIZE + 10, 
                         height: NODE_SIZE + 10,
-                        borderRadius: "50%",
+                        borderRadius: NODE_SIZE / 2 + 5, // Dùng giá trị cụ thể thay cho "50%"
                         backgroundColor: colors.shadow, // Màu tối hơn
                         // Shadow/Elevation để làm nút nổi lên
                         shadowColor: '#000',
@@ -139,7 +160,6 @@ export const Roadmap :React.FC = () => {
                             fontSize: 22,
                             fontWeight: '900',
                             color: 'white',
-                            // Thêm shadow cho Text để nổi bật hơn trên nền nút
                             textShadowColor: 'rgba(0, 0, 0, 0.4)',
                             textShadowOffset: { width: 1, height: 1 },
                             textShadowRadius: 2,
@@ -155,7 +175,7 @@ export const Roadmap :React.FC = () => {
                                     right: -5,
                                     borderColor: '#66BB6A',
                                     borderWidth:2,
-                                    borderRadius:'50%',
+                                    borderRadius: NODE_SIZE / 2, // Dùng giá trị cụ thể thay cho "50%"
                                     backgroundColor:'#FFFFFF'
                                 }}
                             >
@@ -196,53 +216,27 @@ export const Roadmap :React.FC = () => {
         navigation.goBack();
     };
 
-    const fetchQuestCompletions = async (userId: number, topicId: number | string) => {
-        const apiUrl = `${BASE_API_URL}quest-completions/user/${userId}/topic/${topicId}`;
+    const fetchQuests = async (id: number | string) => {
         
-        try {
-            const response = await fetch(apiUrl);
-
-            if (!response.ok) {
-                // Nếu không có quest nào hoàn thành (404) hoặc lỗi khác
-                if (response.status === 404) {
-                     setCompletedQuestIds(new Set()); // Đặt là rỗng
-                     return;
-                }
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data: any[] = await response.json();
-            console.log("data-----------------------------------------------------");
-            console.log(data);
-            // Lọc và lưu trữ các Quest ID duy nhất đã hoàn thành
-            const questIds = new Set(data.map(completion => completion.quest.questId as number));
-            setCompletedQuestIds(questIds);
-        } catch (err) {
-            console.error("[API Error] Lỗi khi tải thông tin hoàn thành Quest:", err);
-            // Vẫn cho phép map tải, chỉ báo lỗi nhẹ
-            setCompletedQuestIds(new Set()); 
-        }
-    };
-
-    const fetchQuestsSummary = async (id: number | string) => {
         setError(null);
-        
-        const apiUrl = `${BASE_API_URL}topics/${id}/quests/summary`;
-
         try {
-            const response = await fetch(apiUrl);
-
+            // SỬ DỤNG ENDPOINT MỚI TRẢ VỀ TRẠNG THÁI QUEST (bao gồm isCompleted và isLocked)
+            const response = await fetch(`${BASE_API_URL}quest-completions/status/user/${userInfo?.userId}/topic/${topicId}`);
             if (!response.ok) {
+                // Xử lý khi không tìm thấy quest (ví dụ: topic không có quest)
+                if (response.status === 404) {
+                    setQuests([]);
+                    return;
+                }
+                // Ném lỗi cho các lỗi HTTP khác
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
-            const data: QuestSummary[] = await response.json();
-            console.log(data);
+            const data: QuestStatus[] = await response.json();
+            console.log("data---quest-------------",data)
             setQuests(data);
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định";
-            Alert.alert("Lỗi", "Không thể tải danh sách Quest. Vui lòng kiểm tra server.");
-            setError(errorMessage);
+        } catch (error) {
+            console.error("Error fetching quest status:", error);
+            setError(error instanceof Error ? error.message : "Lỗi khi tải trạng thái Quest.");
         } finally {
             setLoading(false);
         }
@@ -281,29 +275,111 @@ export const Roadmap :React.FC = () => {
         }
     }
 
+    const fetchQuestDetails = async (questId: number): Promise<QuestDetail | null> => {
+        try {
+            const response = await fetch(`${BASE_API_URL}quests/${questId}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                     // Quest không tồn tại, có thể do lỗi dữ liệu
+                    Alert.alert("Lỗi", `Không tìm thấy chi tiết Quest ID: ${questId}.`);
+                    return null;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data: QuestDetail = await response.json();
+            return data;
+
+        } catch (error) {
+            console.error("Lỗi khi tải chi tiết Quest:", error);
+            Alert.alert("Lỗi", "Không thể tải chi tiết Quest. Vui lòng kiểm tra server.");
+            return null;
+        }
+    };
+
+    const handleStartQuest = () => {
+        if (currentSelectedQuestId !== null) {
+            console.log(`Bắt đầu Quest ID: ${currentSelectedQuestId} - Điều hướng...`);
+            // Logic điều hướng đến màn hình Quest thực tế
+            // Ví dụ: navigation.navigate('QuestScreen', { questId: currentSelectedQuestId });
+            setIsModalVisible(false); // Đóng Modal
+        }
+    };
+
+    const calculateQuestStats = (questDetail: QuestDetail): QuestStats => {
+        const totalQuestions = questDetail.questions.length;
+        
+        // Thống kê theo độ khó (sử dụng bloomLevel của Question)
+        const difficultyStats = questDetail.questions.reduce((acc, q) => {
+            const key = q.bloomLevel.toLowerCase(); 
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+        
+        // Thống kê theo loại câu hỏi (questionType)
+        const typeStats = questDetail.questions.reduce((acc, q) => {
+            const key = q.questionType.toLowerCase();
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return {
+            questName: questDetail.questName,
+            totalQuestions,
+            difficultyStats,
+            typeStats,
+        };
+    };
+
+    const handleQuestPress = async (questId: number, isLocked: boolean, questName: string) => {
+        if (isLocked) {
+            Alert.alert(
+                "Khóa!", 
+                "Bạn cần hoàn thành màn trước đó để mở khóa màn này.",
+                [{ text: "OK" }]
+            );
+            return;
+        }
+
+        console.log(`Đang tải chi tiết Quest: ${questName} (ID: ${questId})`);
+        
+        const questDetail = await fetchQuestDetails(questId);
+        
+        if (questDetail) {
+            const stats = calculateQuestStats(questDetail);
+            
+            // LƯU TRỮ VÀ HIỂN THỊ MODAL
+            setCurrentSelectedQuestId(questId); // Lưu ID quest đang được chọn
+            setSelectedQuestStats(stats);      // Lưu thống kê quest
+            setIsModalVisible(true);           // Mở Modal
+        }
+    };
+
     useEffect(() => {
         fetchUserInfo();
     }, []);
 
     useEffect(() => {
-        if (topicId) {
+        console.log("----test 1----")
+        if (topicId && userInfo?.userId) {
+            
             setIsMapLoaded(false);
             setMapUri(getMapBackground(topicId));
             setMapPath(getMapPath(topicId))
-            fetchQuestsSummary(topicId);
+            
+            // Cần userInfo.userId để gọi API fetchQuests/status
+            fetchQuests(topicId); 
             fetchTopicSummary();
+        } else if (topicId) {
+             // Trường hợp chưa có userInfo nhưng có topicId, chỉ fetch topic summary và map
+             fetchTopicSummary();
         } else {
             console.error("Không tìm thấy topicId trong route params.");
             setError("Thiếu Topic ID.");
         }
-    }, [topicId]);
+    }, [topicId, userInfo]); // Thêm userInfo vào dependency list để đảm bảo fetchQuests chạy sau khi có userId
 
-    useEffect(() => {
-        if (topicId && userInfo?.userId) {
-            console.log(`Đang gọi API hoàn thành cho User ID: ${userInfo.userId} và Topic ID: ${topicId}`);
-            fetchQuestCompletions(userInfo.userId, topicId);
-        }
-    }, [topicId, userInfo]);
 
     if (loading || isMapLoaded) {
         return (
@@ -352,7 +428,7 @@ export const Roadmap :React.FC = () => {
                 <View style={styles.headerContainer}>
                     <IconButton iconColor='#f20717' size={45} icon="arrow-left-thick" onPress={handleGoBack}/>
                     <View style={styles.headerTitleContainer}>
-                        <Image style={styles.headerTitleRibbon}  source={require('../../../assets/ribbon.png')}/>
+                        <Image style={styles.headerTitleRibbon}  source={require('../../../assets/ribbon.png')}/>
                         <Text style={styles.headerTitle}>{topicName}</Text>
                     </View>
                     <IconButton iconColor='#f20717' size={45} icon="cog"/>
@@ -370,6 +446,12 @@ export const Roadmap :React.FC = () => {
                         </View>
                     )}
             </ImageBackground>
+            <QuestStatsModal
+                visible={isModalVisible}
+                stats={selectedQuestStats}
+                onClose={() => setIsModalVisible(false)}
+                onStartQuest={handleStartQuest}
+            />
             <View style={styles.footer}>
                 <View style={styles.footerTop}>
                     <TouchableOpacity style={[

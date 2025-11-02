@@ -1,5 +1,5 @@
 import { View, Image, TouchableOpacity } from "react-native";
-import { Button, TextInput, Text } from "react-native-paper";
+import { Button, TextInput, Text, Icon } from "react-native-paper";
 import styles from "./authLayout.style";
 import SocialMediaBox from "../../components/socialMediaBox/SocialMediaBox";
 import { SocialMediaBtnProps } from "../../types/socialMediaTypes";
@@ -57,17 +57,16 @@ const AuthLayout = ({SocialMediaList,
                         {isLogin && <Text style={styles.forgotPassword}>Quên mật khẩu?</Text>}
                     </View>
                     <View>
-                        <Button 
+                        <TouchableOpacity 
                             style={styles.button} 
-                            icon={isLogin ? "login" : "account"} 
-                            mode="contained" 
-                            buttonColor='#f20717' 
-                            onPress={onMainAction} // GẮN HÀM HÀNH ĐỘNG CHÍNH
-                            loading={loading} // GẮN TRẠNG THÁI LOADING
-                            disabled={loading} // DISABLE KHI ĐANG LOADING
+                            onPress={onMainAction}
+                            disabled={loading}
                         >
+                            {isLogin && (
+                                <Icon source="login" size={20} color="#fff"/>
+                            )}
                             <Text style={styles.buttonTxt}>{isLogin ? "Đăng nhập" : "Đăng ký"}</Text>
-                        </Button>
+                        </TouchableOpacity>
                         <Image style={styles.btnHolder} source={{uri:"https://firebasestorage.googleapis.com/v0/b/wander-stay.appspot.com/o/btn_hold-removebg-preview.png?alt=media&token=0973f18d-bcc8-45fc-84ab-ecac7da3c1d5"}}/>
                         <DividerWithText text={isLogin ? "Đăng nhập bằng cách khác" : "Đăng ký bằng cách khác"} />
                         <SocialMediaBox SocialMediaList={SocialMediaList} />

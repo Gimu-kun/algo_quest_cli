@@ -51,10 +51,15 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
     },
     button:{
+        display:'flex',
+        flexDirection:'row',
+        justifyContent:'center',
+        columnGap:15,
         marginVertical:20,
-        paddingVertical: 8,
+        padding: 18,
         borderRadius: 5,
         alignItems: 'center',
+        backgroundColor:'#f20717'
     },
     buttonTxt:{
         fontSize: 18,

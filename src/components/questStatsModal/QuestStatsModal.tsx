@@ -4,6 +4,7 @@ import modalStyles from './questStatsModal.styles';
 
 // Đảm bảo interface QuestStats được import/định nghĩa đúng
 interface QuestStats {
+    questId: number;
     questName: string;
     totalQuestions: number;
     difficultyStats: Record<string, number>;
@@ -24,7 +25,7 @@ const formatKeyName = (key: string) => {
 
 export const QuestStatsModal: React.FC<QuestStatsModalProps> = ({ visible, stats, onClose, onStartQuest }) => {
     if (!stats) return null;
-
+    
     return (
         <Modal
             animationType="fade"

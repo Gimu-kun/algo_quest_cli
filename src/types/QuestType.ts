@@ -24,6 +24,7 @@ interface QuestDetail {
 }
 
 interface QuestStats {
+    questId: number;
     questName: string;
     totalQuestions: number;
     difficultyStats: Record<string, number>;

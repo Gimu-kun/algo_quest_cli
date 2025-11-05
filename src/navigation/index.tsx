@@ -13,6 +13,8 @@ import { Login } from './screens/Login/Login';
 import { Register } from './screens/Register/Register';
 import { Home } from './screens/Home/Home';
 import { Roadmap } from './screens/Roadmap/Roadmap';
+import QuestionRenderer from '../components/questionRenderer/QuestionRenderer';
+import { SinglePlay } from './screens/SinglePlay/SinglePlay';
 
 // 1. Chỉ chứa các màn hình cần Tab Bar (Ví dụ: Home, Roadmap nếu bạn muốn Tab ở dưới)
 const HomeTabs = createBottomTabNavigator({
@@ -55,10 +57,10 @@ const RootStack = createNativeStackNavigator({
         headerShown: false,
       },
     },
-    Register: {
-      screen: Register,
+    QuestionRenderer: {
+      screen: QuestionRenderer,
       options: {
-        title: 'Register',
+        title: 'QuestionRenderer',
         headerShown: false,
       },
     },
@@ -76,6 +78,13 @@ const RootStack = createNativeStackNavigator({
          headerShown: false,
        },
      },
+    SinglePlay: {
+       screen: SinglePlay,
+       options: {
+         title: 'SinglePlay',
+         headerShown: false,
+       },
+     }
   },
 });
 

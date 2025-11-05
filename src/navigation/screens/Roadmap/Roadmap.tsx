@@ -13,6 +13,7 @@ import { QuestStatsModal } from "../../../components/questStatsModal/QuestStatsM
 
 type RootStackParamList = {
     Roadmap: { topicId: number | string };
+    SinglePlay: { questId: number };
 };
 
 const MAP_BACKGROUNDS = [
@@ -232,10 +233,8 @@ export const Roadmap :React.FC = () => {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data: QuestStatus[] = await response.json();
-            console.log("data---quest-------------",data)
             setQuests(data);
         } catch (error) {
-            console.error("Error fetching quest status:", error);
             setError(error instanceof Error ? error.message : "Lỗi khi tải trạng thái Quest.");
         } finally {
             setLoading(false);
@@ -267,7 +266,6 @@ export const Roadmap :React.FC = () => {
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Đã xảy ra lỗi không xác định";
-            console.error("[API Error] Lỗi khi tải dữ liệu Topic:", errorMessage);
             Alert.alert("Lỗi", "Không thể tải danh sách Topic. Vui lòng kiểm tra server.");
             setError(errorMessage);
         } finally {
@@ -292,7 +290,6 @@ export const Roadmap :React.FC = () => {
             return data;
 
         } catch (error) {
-            console.error("Lỗi khi tải chi tiết Quest:", error);
             Alert.alert("Lỗi", "Không thể tải chi tiết Quest. Vui lòng kiểm tra server.");
             return null;
         }
@@ -300,10 +297,10 @@ export const Roadmap :React.FC = () => {
 
     const handleStartQuest = () => {
         if (currentSelectedQuestId !== null) {
-            console.log(`Bắt đầu Quest ID: ${currentSelectedQuestId} - Điều hướng...`);
-            // Logic điều hướng đến màn hình Quest thực tế
-            // Ví dụ: navigation.navigate('QuestScreen', { questId: currentSelectedQuestId });
-            setIsModalVisible(false); // Đóng Modal
+            setIsModalVisible(false);
+            navigation.navigate('SinglePlay', { 
+                questId: currentSelectedQuestId 
+            });
         }
     };
 
@@ -325,6 +322,7 @@ export const Roadmap :React.FC = () => {
         }, {} as Record<string, number>);
 
         return {
+            questId: questDetail.questId,
             questName: questDetail.questName,
             totalQuestions,
             difficultyStats,
@@ -341,8 +339,6 @@ export const Roadmap :React.FC = () => {
             );
             return;
         }
-
-        console.log(`Đang tải chi tiết Quest: ${questName} (ID: ${questId})`);
         
         const questDetail = await fetchQuestDetails(questId);
         
@@ -361,7 +357,6 @@ export const Roadmap :React.FC = () => {
     }, []);
 
     useEffect(() => {
-        console.log("----test 1----")
         if (topicId && userInfo?.userId) {
             
             setIsMapLoaded(false);
@@ -380,6 +375,21 @@ export const Roadmap :React.FC = () => {
         }
     }, [topicId, userInfo]); // Thêm userInfo vào dependency list để đảm bảo fetchQuests chạy sau khi có userId
 
+    useEffect(() => {
+            // Lắng nghe sự kiện 'focus' từ React Navigation
+            const unsubscribe = navigation.addListener('focus', () => {
+                console.log("Roadmap được focus, đang tải lại trạng thái quests...");
+                
+                // Chỉ chạy lại logic fetchQuests (vì chỉ trạng thái quest thay đổi)
+                if (topicId && userInfo?.userId) {
+                    // setLoading(true); // (Tùy chọn) Bật loading để người dùng biết
+                    fetchQuests(topicId);
+                }
+            });
+    
+            // Hủy đăng ký listener khi component bị unmount
+            return unsubscribe;
+        }, [navigation, topicId, userInfo]);
 
     if (loading || isMapLoaded) {
         return (

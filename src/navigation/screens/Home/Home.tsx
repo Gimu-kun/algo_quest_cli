@@ -1,4 +1,4 @@
-import { View , Animated, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View , Animated, TouchableOpacity, Text, StyleSheet, Alert } from "react-native";
 import HomeCarousel from "../../../components/homeCarousel/HomeCarousel";
 import InfoBar from "../../../components/infoBar/InfoBar";
 import HomeCourses from "../../../components/homeCourses/HomeCourses";
@@ -10,12 +10,90 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../../../ApiConfig";
 import { UserInfo } from "../../../types/userType";
+import HomeMultiplay from "../../../components/homeMultiplay/HomeMultiplay";
+import { deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { db } from "../../../firebase";
 
-
+type InviteData = {
+    roomId: string;
+    roomName: string;
+    hostUsername: string;
+};
 
 export const Home = () => {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const navigation = useNavigation<any>();
+
+    useEffect(() => {
+        let unsubscribe: (() => void) | null = null;
+
+        const checkInvites = async () => {
+            try {
+                // 1. Lấy thông tin người dùng hiện tại
+                const jsonValue = await AsyncStorage.getItem('authData');
+                if (jsonValue === null) return; // Chưa đăng nhập
+
+                const authData = JSON.parse(jsonValue);
+                const username = authData.user?.username;
+                if (!username) return;
+
+                setUserInfo(authData.user); // (Cập nhật userInfo nếu cần)
+
+                // 2. Tạo listener trong Firestore
+                // Lắng nghe document có ID là username của MÌNH
+                const inviteRef = doc(db, 'invitations', username);
+                
+                unsubscribe = onSnapshot(inviteRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        
+                        // 3. Nếu có lời mời, hiển thị Alert
+                        if (data.pending_invite) {
+                            const invite: InviteData = data.pending_invite;
+                            handleIncomingInvite(invite, inviteRef);
+                        }
+                    }
+                });
+
+            } catch (e) {
+                console.error("Lỗi khi kiểm tra lời mời:", e);
+            }
+        };
+
+        checkInvites();
+
+        // Dọn dẹp listener
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
+    }, []);
+
+        const handleIncomingInvite = (invite: InviteData, inviteRef: any) => {
+        Alert.alert(
+            "Bạn có lời mời!",
+            `'${invite.hostUsername}' mời bạn tham gia phòng: ${invite.roomName} (ID: ${invite.roomId})`,
+            [
+                {
+                    text: "Từ chối",
+                    style: "cancel",
+                    onPress: async () => {
+                        // (Scenario 1c) Xóa lời mời
+                        await deleteDoc(inviteRef);
+                    }
+                },
+                {
+                    text: "Chấp nhận",
+                    onPress: async () => {
+                        // (Scenario 1b) Xóa lời mời VÀ chuyển trang
+                        await deleteDoc(inviteRef);
+                        navigation.navigate('WaitingRoom', { roomId: invite.roomId });
+                    }
+                }
+            ]
+        );
+    };
 
     const fetchUserInfo = async () => {
         try {
@@ -154,6 +232,7 @@ export const Home = () => {
                 )}>
                     <HomeCarousel />
                     <HomeCourses />
+                    <HomeMultiplay/>
                     <HomeCategories itemsData={courseItemsData} headerText="Cấu trúc minh hoạ"/>
                     <HomeCategories itemsData={skillItemsData} headerText="Thuật toán minh hoạ"/>
                 </Animated.ScrollView>

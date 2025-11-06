@@ -4,7 +4,7 @@ import AuthLayout from "../../../layout/auth/AuthLayout";
 import { AuthFieldsType } from "../../../types/authFieldsType";
 import { useNavigation } from "@react-navigation/native";
 import axios from 'axios';
-import { Alert, TouchableOpacity, View, Text, Image, StyleSheet, Platform } from 'react-native';
+import { Alert, TouchableOpacity, View, Text, Image, StyleSheet, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { USER_API_URL } from '../../../ApiConfig';
 
@@ -127,33 +127,45 @@ export const Register: React.FC = () => {
     ];
 
     return (
-        <AuthLayout 
-            welcomeWords="Chào mừng bạn đến với hành trình chinh phục kiến thức!"
-            SocialMediaList={SocialMediaList} 
-            isLogin={false} 
-            fields={fields}
-            
-            CustomComponentBeforeFields={
-                <View style={styles.avatarPickerContainer}>
-                   {credentials.avatarUri && (
-                        <Image 
-                            source={{ uri: credentials.avatarUri }} 
-                            style={styles.avatarPreview}
-                        />
-                    )}
-                    <TouchableOpacity onPress={handlePickImage} style={styles.avatarButton}>
-                            <Text>
-                                Chọn Avatar
-                            </Text>
-                    </TouchableOpacity>
-                </View>
-            }
-            
-            onInputChange={handleInputChange as (key: string, value: string) => void} 
-            currentData={credentials as unknown as { [key: string]: string }} 
-            onMainAction={handleRegister} 
-            onSwitchAction={handleSwitchToLogin} 
-        />
+        <KeyboardAvoidingView
+            style={{ flex: 1 }} // Quan trọng: Đảm bảo nó chiếm toàn bộ không gian
+            behavior={Platform.OS === "ios" ? "padding" : "height"} // 'padding' cho iOS, 'height'/'none' cho Android
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // Điều chỉnh khoảng cách nếu cần
+        >
+            {/* Thêm ScrollView để cuộn được khi bàn phím bật lên */}
+            <ScrollView 
+                contentContainerStyle={{ flexGrow: 1 }} // Quan trọng để ScrollView nhận kích thước nội dung
+                keyboardShouldPersistTaps="handled" // Giúp các TouchableOpacity/Button vẫn hoạt động khi cuộn
+            >
+                <AuthLayout 
+                    welcomeWords="Chào mừng bạn đến với hành trình chinh phục kiến thức!"
+                    SocialMediaList={SocialMediaList} 
+                    isLogin={false} 
+                    fields={fields}
+                    
+                    CustomComponentBeforeFields={
+                        <View style={styles.avatarPickerContainer}>
+                        {credentials.avatarUri && (
+                                <Image 
+                                    source={{ uri: credentials.avatarUri }} 
+                                    style={styles.avatarPreview}
+                                />
+                            )}
+                            <TouchableOpacity onPress={handlePickImage} style={styles.avatarButton}>
+                                    <Text>
+                                        Chọn Avatar
+                                    </Text>
+                            </TouchableOpacity>
+                        </View>
+                    }
+                    
+                    onInputChange={handleInputChange as (key: string, value: string) => void} 
+                    currentData={credentials as unknown as { [key: string]: string }} 
+                    onMainAction={handleRegister} 
+                    onSwitchAction={handleSwitchToLogin} 
+                />
+        </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 

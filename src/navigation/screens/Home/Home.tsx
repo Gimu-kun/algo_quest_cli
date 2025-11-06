@@ -215,11 +215,9 @@ export const Home = () => {
             <View style={styles.page}>
                 {userInfo && (
                     <InfoBar 
-                        // TRUYỀN PROPS VÀO InfoBar
                         fullName={userInfo.fullName} 
-                        // Ghép URL đầy đủ cho Avatar
                         avatarUrl={`${BASE_URL}${userInfo.avatar}`} 
-                        onLogout={handleLogout} // Truyền hàm Đăng xuất
+                        onLogout={handleLogout}
                     />
                 )}
                 <Animated.View style={[styles.pageRound,{opacity: fadeOut}]} />

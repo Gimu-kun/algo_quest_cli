@@ -3,6 +3,7 @@ import { styles } from "./homeMultiplay.style";
 import { Icon } from "react-native-paper";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../navigation/types";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function HomeMultiplay() {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -35,7 +36,7 @@ export default function HomeMultiplay() {
             style={styles.button} 
             onPress={handleJoinRoom} // <-- Cập nhật
           >
-            <Icon source="login" size={20} color="#a13203ff" />
+            <Icon source={{ uri: "login" }} size={20} color="#a13203ff" />
             <Text style={styles.buttonText}>Tham gia phòng</Text>
           </TouchableOpacity>
 
@@ -44,7 +45,7 @@ export default function HomeMultiplay() {
             style={styles.button}
             onPress={handleCreateRoom} // <-- 6. SỬ DỤNG HÀM MỚI
           >
-            <Icon source="circle" size={20} color="#0ba103ff" />
+            <Icon source={"login" as any} size={20} color="#a13203ff" />
             <Text style={styles.buttonText}>Tạo phòng mới</Text>
           </TouchableOpacity>
         </View>

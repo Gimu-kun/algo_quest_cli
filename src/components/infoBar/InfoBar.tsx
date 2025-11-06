@@ -57,13 +57,11 @@ const InfoBar = ({ fullName, avatarUrl, onLogout }: InfoBarProps) => {
                 </Dialog>
             </Portal>
             <View style={styles.infoBox}>
-                <TouchableOpacity onPress={navigateToProfile}> {/* <-- THÊM onPress */}
-                    <View style={styles.avatarBox}>
-                        <Avatar.Image size={55} source={{ uri: avatarUrl }} />
-                    </View>
+                <TouchableOpacity onPress={navigateToProfile}>
+                    <View style={styles.avatarBox}><Avatar.Image size={55} source={{ uri: avatarUrl }} /></View>
                 </TouchableOpacity>
                 <View>
-                    <TouchableOpacity onPress={navigateToProfile}> {/* <-- THÊM onPress */}
+                    <TouchableOpacity onPress={navigateToProfile}>
                         <Text style={styles.accName} variant="labelLarge">{fullName}</Text>
                     </TouchableOpacity>
                     <View style={styles.toolBox}>

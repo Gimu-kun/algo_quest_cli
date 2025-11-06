@@ -31,6 +31,7 @@ export const MultiplayerGame: React.FC = () => {
     const [gameData, setGameData] = useState<MultiplayerGameState | null>(null);
     const firebaseUIDRef = useRef<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isExiting, setIsExiting] = useState(false);
 
     // Dùng để chạy timer
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -369,15 +370,23 @@ export const MultiplayerGame: React.FC = () => {
 
             {/* Results Modal */}
             {gameState === 'results' && (
-                <View style={styles.resultsModal}>
-                    <Text style={styles.resultsTitle}>KẾT QUẢ</Text>
-                    <Text style={styles.resultsScore}>Bạn: {playerScores[firebaseUID]}</Text>
-                    <Text style={styles.resultsScore}>Đối thủ: {playerScores[opponentId]}</Text>
-                    <TouchableOpacity style={styles.buzzButton} onPress={() => navigation.navigate('Home')}>
-                        <Text style={styles.buzzButtonText}>VỀ SẢNH CHỜ</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+                <View style={styles.resultsModal}>
+                    {/* [MỚI] Hiển thị loading khi đang dọn phòng */}
+                    {isExiting ? (
+                        <ActivityIndicator size="large" color="#FFFFFF" />
+                    ) : (
+                        <>
+                            <Text style={styles.resultsTitle}>KẾT QUẢ</Text>
+                            <Text style={styles.resultsScore}>Bạn: {playerScores[firebaseUID]}</Text>
+                            <Text style={styles.resultsScore}>Đối thủ: {playerScores[opponentId]}</Text>
+                            {/* [SỬA] Gọi hàm dọn dẹp mới */}
+                            <TouchableOpacity style={styles.buzzButton} onPress={()=>{navigation.navigate('HomeTabs', { screen: 'Home' })}}>
+                                <Text style={styles.buzzButtonText}>VỀ SẢNH CHỜ</Text>
+                            </TouchableOpacity>
+                        </>
+                    )}
+                </View>
+            )}
         </SafeAreaView>
     );
 };

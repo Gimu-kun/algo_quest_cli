@@ -253,12 +253,13 @@ const WaitingRoom: React.FC = () => {
     // --- MAIN useEffect: Khởi tạo và Lắng nghe ---
     useEffect(() => {
         let unsubscribe: (() => void) | null = null;
+        let localUser: Player | null = null;
 
         const initialize = async () => {
             setIsLoading(true);
             const user = await fetchUserInfo();
             if (!user) return;
-
+            localUser = user;
             let R_ID = route.params.roomId;
 
             if (R_ID === null) {
@@ -279,6 +280,17 @@ const WaitingRoom: React.FC = () => {
                     const data = docSnap.data() as BattleRoom;
                     setRoomData(data);
                     
+                    if (localUser) {
+                          const amIInLobby = data.players.some(p => p.userId === localUser!.userId);
+                          // Nếu tôi không phải Host VÀ tôi không còn trong phòng
+                          if (data.hostId !== localUser.userId && !amIInLobby) {
+                              if (unsubscribe) unsubscribe(); // Dừng lắng nghe
+                              Alert.alert("Thông báo", "Bạn đã bị đuổi khỏi phòng.");
+                              navigation.navigate('HomeTabs', { screen: 'Home' }); // Về Home
+                              return; // Dừng xử lý
+                          }
+                      }
+
                     // Xử lý logic game (ví dụ: host bắt đầu)
                     if (data.status === 'in_progress') {
                         // (Hủy đăng ký listener của phòng chờ TRƯỚC KHI chuyển trang)
@@ -347,6 +359,7 @@ const WaitingRoom: React.FC = () => {
     };
 
     const handleKickPlayer = async () => {
+        console.log("test");
         if (!isHost || !guest || !roomId) return;
         
         const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'battle_rooms', roomId);

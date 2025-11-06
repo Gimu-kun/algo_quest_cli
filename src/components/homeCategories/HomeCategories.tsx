@@ -13,7 +13,7 @@ const HomeCategories = ({itemsData,headerText} : {itemsData:cateItemsType[], hea
                             <Icon 
                             size={20}
                             color="#ffffff" 
-                            source={items.icon} />
+                            source={{ uri: items.icon }} />
                         </View>
                     </View>
                 </View>

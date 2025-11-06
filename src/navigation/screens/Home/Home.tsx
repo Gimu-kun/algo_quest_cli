@@ -5,14 +5,16 @@ import HomeCourses from "../../../components/homeCourses/HomeCourses";
 import styles from "./home.style";
 import HomeCategories from "../../../components/homeCategories/HomeCategories";
 import { cateItemsType } from "../../../types/cateItemsType";
-import { useEffect, useRef, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useEffect, useRef, useState, useCallback } from "react"; 
+import { useNavigation } from "@react-navigation/native"; 
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../../../ApiConfig";
 import { UserInfo } from "../../../types/userType";
 import HomeMultiplay from "../../../components/homeMultiplay/HomeMultiplay";
 import { deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../firebase";
+import { RootStackParamList } from "../../types";
 
 type InviteData = {
     roomId: string;
@@ -22,45 +24,53 @@ type InviteData = {
 
 export const Home = () => {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-    const navigation = useNavigation<any>();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+    const fetchUserInfo = useCallback(async () => {
+        try {
+            console.log("Đang tải dữ liệu User...");
+            const jsonValue = await AsyncStorage.getItem('authData');
+
+            if (jsonValue !== null) {
+                const authData = JSON.parse(jsonValue);
+                const userData = authData.user;
+                setUserInfo({
+                    userId: userData.userId,
+                    username: userData.username,
+                    fullName: userData.fullName || userData.username, 
+                    avatar: userData.avatar,
+                    role: userData.role,
+                });
+                return userData; // Trả về user cho listener
+            } else {
+                setUserInfo(null); // Xử lý nếu đã logout
+            }
+        } catch (e) {
+            console.error("Lỗi khi đọc AsyncStorage:", e);
+        }
+        return null;
+    }, []);
 
     useEffect(() => {
         let unsubscribe: (() => void) | null = null;
 
-        const checkInvites = async () => {
-            try {
-                // 1. Lấy thông tin người dùng hiện tại
-                const jsonValue = await AsyncStorage.getItem('authData');
-                if (jsonValue === null) return; // Chưa đăng nhập
-
-                const authData = JSON.parse(jsonValue);
-                const username = authData.user?.username;
-                if (!username) return;
-
-                setUserInfo(authData.user); // (Cập nhật userInfo nếu cần)
-
+        const initialize = async () => {
+            const user = await fetchUserInfo(); // Tải user lần đầu
+            
+            if (user && user.username) {
                 // 2. Tạo listener trong Firestore
-                // Lắng nghe document có ID là username của MÌNH
-                const inviteRef = doc(db, 'invitations', username);
+                const inviteRef = doc(db, 'invitations', user.username);
                 
                 unsubscribe = onSnapshot(inviteRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        // 3. Nếu có lời mời, hiển thị Alert
-                        if (data.pending_invite) {
-                            const invite: InviteData = data.pending_invite;
-                            handleIncomingInvite(invite, inviteRef);
-                        }
+                    if (docSnap.exists() && docSnap.data().pending_invite) {
+                        const invite: InviteData = docSnap.data().pending_invite;
+                        handleIncomingInvite(invite, inviteRef);
                     }
                 });
-
-            } catch (e) {
-                console.error("Lỗi khi kiểm tra lời mời:", e);
             }
         };
 
-        checkInvites();
+        initialize();
 
         // Dọn dẹp listener
         return () => {
@@ -68,7 +78,18 @@ export const Home = () => {
                 unsubscribe();
             }
         };
-    }, []);
+    }, [fetchUserInfo]);
+
+    useEffect(() => {
+        const unsubscribeFocus = navigation.addListener('focus', () => {
+            console.log("Màn hình Home được focus, tải lại InfoBar...");
+            // Khi quay lại từ Profile, hàm này sẽ chạy
+            fetchUserInfo(); 
+        });
+
+        // Dọn dẹp listener
+        return unsubscribeFocus;
+    }, [navigation, fetchUserInfo]);
 
         const handleIncomingInvite = (invite: InviteData, inviteRef: any) => {
         Alert.alert(
@@ -93,28 +114,6 @@ export const Home = () => {
                 }
             ]
         );
-    };
-
-    const fetchUserInfo = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('authData');
-
-            if (jsonValue !== null) {
-                // Phân tích chuỗi JSON thành đối tượng { user: {...}, token: "..." }
-                const authData = JSON.parse(jsonValue);
-                const userData = authData.user;
-                // Cập nhật state với thông tin người dùng cần hiển thị
-                setUserInfo({
-                    userId: userData.userId,
-                    username: userData.username,
-                    fullName: userData.fullName || userData.username, // Hiển thị tên đầy đủ
-                    avatar: userData.avatar,
-                    role: userData.role,
-                });
-            }
-        } catch (e) {
-            console.error("Lỗi khi đọc AsyncStorage:", e);
-        }
     };
 
     useEffect(() => {

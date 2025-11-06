@@ -23,9 +23,12 @@ import {
 } from '../../../firebase';
 import { TopicSummary } from '../../../types/TopicType';
 import { BASE_API_URL } from '../../../ApiConfig';
+import { QuestDetail } from '../../../types/SinglePlayTypes';
+import { fetchQuestDetails } from '../../../Utils/QuestUtils';
+import { MultiplayerGameState } from '../../../types/MultiplayerTypes';
 
 // Kiểu dữ liệu
-type Player = {
+export type Player = {
     userId: string;
     username: string;
     avatar: string | null;
@@ -97,6 +100,61 @@ const WaitingRoom: React.FC = () => {
             console.error("Lỗi xác thực hoặc lấy thông tin:", e);
             Alert.alert("Lỗi", "Không thể xác thực người dùng.", [{ text: "OK", onPress: () => navigation.goBack() }]);
             return null;
+        }
+    };
+
+    const handleStartGame = async () => {
+        if (!isHost || roomData?.players.length !== 2 || !roomId || !currentUser) {
+            Alert.alert("Chưa sẵn sàng", "Cần đủ 2 người chơi để bắt đầu.");
+            return;
+        }
+
+        try {
+            // 1. Lấy Quest ngẫu nhiên từ Backend (API mới)
+            const topicId = roomData.topicId;
+            const questResponse = await fetch(`${BASE_API_URL}topics/${topicId}/random-quest-id`);
+            if (!questResponse.ok) throw new Error("Không thể lấy Quest ngẫu nhiên.");
+            const randomQuestId = await questResponse.json();
+
+            // 2. Lấy chi tiết Quest (Sử dụng lại hàm của SinglePlay)
+            const questData = await fetchQuestDetails(randomQuestId);
+
+            // 3. Tính tổng điểm
+            const totalScore = questData.questions.reduce((sum, q) => sum + q.score, 0);
+
+            // 4. Tạo Game State mới trên Firestore
+            const gameRoomRef = doc(db, 'artifacts', appId, 'public', 'data', 'battle_games', roomId);
+            
+            const initialGameState: MultiplayerGameState = {
+                quest: questData,
+                topicId: topicId,
+                startTime: Date.now(),
+                currentQuestionIndex: 0,
+                gameState: 'preview', // Bắt đầu ở màn hình xem trước
+                questionTimer: 3, // 3 giây
+                answerTimer: 5,
+                activePlayerId: null,
+                playerScores: {
+                    [roomData.players[0].userId]: 0, // Player A
+                    [roomData.players[1].userId]: 0, // Player B
+                },
+                totalPossibleScore: totalScore,
+                lastAnswer: null
+            };
+            
+            await setDoc(gameRoomRef, initialGameState);
+
+            // 5. Cập nhật Lobby (để kích hoạt chuyển trang)
+            const lobbyRoomRef = doc(db, 'artifacts', appId, 'public', 'data', 'battle_rooms', roomId);
+            await updateDoc(lobbyRoomRef, {
+                status: 'in_progress'
+            });
+
+            // (Hàm onSnapshot trong useEffect sẽ tự động điều hướng)
+            
+        } catch (error: any) {
+            console.error("Lỗi khi bắt đầu game:", error);
+            Alert.alert("Lỗi", error.message || "Không thể bắt đầu trận đấu.");
         }
     };
 
@@ -223,8 +281,10 @@ const WaitingRoom: React.FC = () => {
                     
                     // Xử lý logic game (ví dụ: host bắt đầu)
                     if (data.status === 'in_progress') {
-                        // (Chưa làm) Điều hướng đến màn hình chơi game
-                        // navigation.navigate('MultiplayerGame', { roomId: R_ID });
+                        // (Hủy đăng ký listener của phòng chờ TRƯỚC KHI chuyển trang)
+                        if (unsubscribe) unsubscribe();
+                        // Chuyển sang màn hình Game
+                        navigation.navigate('MultiplayerGame', { roomId: R_ID! });
                     }
                 } else {
                     // Phòng đã bị xóa (ví dụ: chủ phòng rời đi)
@@ -339,24 +399,6 @@ const WaitingRoom: React.FC = () => {
         } catch (error) {
             console.error("Lỗi cập nhật chủ đề:", error);
             Alert.alert("Lỗi", "Không thể cập nhật chủ đề.");
-        }
-    };
-
-    const handleStartGame = async () => {
-        if (!isHost || roomData?.players.length !== 2) {
-            Alert.alert("Chưa sẵn sàng", "Cần đủ 2 người chơi để bắt đầu.");
-            return;
-        }
-        
-        const roomRef = doc(db, 'artifacts', appId!, 'public', 'data', 'battle_rooms', roomId!);
-        try {
-            // Cập nhật trạng thái phòng -> 'in_progress'
-            // (Listener onSnapshot ở cả 2 máy sẽ bắt được sự kiện này)
-            await updateDoc(roomRef, {
-                status: 'in_progress'
-            });
-        } catch (error) {
-            console.error("Lỗi khi bắt đầu game:", error);
         }
     };
 

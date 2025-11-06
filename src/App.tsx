@@ -8,6 +8,7 @@ import { useColorScheme } from 'react-native';
 import { Navigation } from './navigation';
 import Toast from 'react-native-toast-message';
 import { PaperProvider } from 'react-native-paper';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 Asset.loadAsync([
   ...NavigationAssets,
@@ -25,6 +26,7 @@ export function App() {
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <PaperProvider>
       <Navigation
         theme={theme}
@@ -38,5 +40,6 @@ export function App() {
       />
       <Toast />
     </PaperProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -16,6 +16,10 @@ import { Roadmap } from './screens/Roadmap/Roadmap';
 import QuestionRenderer from '../components/questionRenderer/QuestionRenderer';
 import { SinglePlay } from './screens/SinglePlay/SinglePlay';
 import WaitingRoom from './screens/WaitingRoom/WaitingRoom';
+import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
+import { AchievementScreen } from './screens/AchievementScreen/AchievementScreen';
+import { MultiplayerGame } from './screens/Multiplayer/MultiplayerGame';
+import LeaderboardScreen from './screens/LeaderBoard/LeaderBoardScreen';
 
 // 1. Chỉ chứa các màn hình cần Tab Bar (Ví dụ: Home, Roadmap nếu bạn muốn Tab ở dưới)
 const HomeTabs = createBottomTabNavigator({
@@ -25,6 +29,54 @@ const HomeTabs = createBottomTabNavigator({
       screen: Home,
       options: {
         title: 'Home',
+        tabBarIcon: ({ color, size }) => (
+          <Image
+            source={newspaper}
+            tintColor={color}
+            style={{
+              width: size,
+              height: size,
+            }}
+          />
+        ),
+      },
+    },
+    ProfileScreen: {
+      screen: ProfileScreen,
+      options: {
+        title: 'ProfileScreen',
+        tabBarIcon: ({ color, size }) => (
+          <Image
+            source={newspaper}
+            tintColor={color}
+            style={{
+              width: size,
+              height: size,
+            }}
+          />
+        ),
+      },
+    },
+    AchievementScreen: {
+      screen: AchievementScreen,
+      options: {
+        title: 'AchievementScreen',
+        tabBarIcon: ({ color, size }) => (
+          <Image
+            source={newspaper}
+            tintColor={color}
+            style={{
+              width: size,
+              height: size,
+            }}
+          />
+        ),
+      },
+    },
+    LeaderboardScreen: {
+      screen: LeaderboardScreen,
+      options: {
+        title: 'LeaderboardScreen',
         tabBarIcon: ({ color, size }) => (
           <Image
             source={newspaper}
@@ -98,6 +150,34 @@ const RootStack = createNativeStackNavigator({
        options: {
          title: 'WaitingRoom',
          headerShown: false,
+       },
+     },
+     ProfileScreen: {
+       screen: ProfileScreen,
+       options: {
+         title: 'ProfileScreen',
+         headerShown: true,
+       },
+     },
+     AchievementScreen: {
+       screen: AchievementScreen,
+       options: {
+         title: 'AchievementScreen',
+         headerShown: true,
+       },
+     },
+     MultiplayerGame: {
+       screen: MultiplayerGame,
+       options: {
+         title: 'MultiplayerGame',
+         headerShown: true,
+       },
+     },
+     LeaderboardScreen: {
+       screen: LeaderboardScreen,
+       options: {
+         title: 'LeaderboardScreen',
+         headerShown: true,
        },
      }
   },

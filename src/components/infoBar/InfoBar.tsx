@@ -3,6 +3,9 @@ import {styles} from './infoBar.styles'
 import { Avatar, Dialog, IconButton, Portal,Button } from 'react-native-paper';
 import { Text } from 'react-native-paper';
 import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
 
 interface InfoBarProps {
     fullName: string;
@@ -10,9 +13,12 @@ interface InfoBarProps {
     onLogout: () => void;
 }
 
+type InfoBarNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 const InfoBar = ({ fullName, avatarUrl, onLogout }: InfoBarProps) => {
 
     const [visible, setVisible] = useState(false);
+    const navigation = useNavigation<InfoBarNavigationProp>();
 
     const showDialog = () => setVisible(true);
     const hideDialog = () => setVisible(false);
@@ -20,6 +26,15 @@ const InfoBar = ({ fullName, avatarUrl, onLogout }: InfoBarProps) => {
     const handleConfirm = () => {
         onLogout();
         hideDialog();
+    };
+
+    const navigateToProfile = () => {
+        navigation.navigate('ProfileScreen');
+    };
+
+    // (THÊM HÀM)
+    const navigateToAchievement = () => {
+        navigation.navigate('AchievementScreen');
     };
 
     return(
@@ -42,11 +57,15 @@ const InfoBar = ({ fullName, avatarUrl, onLogout }: InfoBarProps) => {
                 </Dialog>
             </Portal>
             <View style={styles.infoBox}>
-                <View style={styles.avatarBox}>
-                    <Avatar.Image size={55} source={{ uri: avatarUrl }} />
-                </View>
+                <TouchableOpacity onPress={navigateToProfile}> {/* <-- THÊM onPress */}
+                    <View style={styles.avatarBox}>
+                        <Avatar.Image size={55} source={{ uri: avatarUrl }} />
+                    </View>
+                </TouchableOpacity>
                 <View>
-                    <Text style={styles.accName} variant="labelLarge">{fullName}</Text>
+                    <TouchableOpacity onPress={navigateToProfile}> {/* <-- THÊM onPress */}
+                        <Text style={styles.accName} variant="labelLarge">{fullName}</Text>
+                    </TouchableOpacity>
                     <View style={styles.toolBox}>
                         <IconButton
                             icon="fire"
@@ -57,19 +76,11 @@ const InfoBar = ({ fullName, avatarUrl, onLogout }: InfoBarProps) => {
                         />
                         <View style={styles.toolLine}/>
                         <IconButton
-                            icon="book-clock-outline"
+                            icon="trophy-outline"
                             iconColor="#E0E0E0"
                             style={styles.toolIcon}
                             size={25}
-                            onPress={() => console.log('Pressed')}
-                        />
-                        <View style={styles.toolLine}/>
-                        <IconButton
-                            icon="camera"
-                            iconColor="#E0E0E0"
-                            style={styles.toolIcon}
-                            size={25}
-                            onPress={() => console.log('Pressed')}
+                            onPress={navigateToAchievement} // <-- THÊM onPress
                         />
                         <View style={styles.toolLine}/>
                         <TouchableOpacity 

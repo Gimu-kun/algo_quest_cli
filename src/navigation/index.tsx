@@ -20,6 +20,8 @@ import { ProfileScreen } from './screens/ProfileScreen/ProfileScreen';
 import { AchievementScreen } from './screens/AchievementScreen/AchievementScreen';
 import { MultiplayerGame } from './screens/Multiplayer/MultiplayerGame';
 import LeaderboardScreen from './screens/LeaderBoard/LeaderBoardScreen';
+import { BattleHistory } from './screens/BattleHistory/BattleHistory';
+import { BattleDetail } from './screens/BattleDetailScreen/BattleDetail';
 
 // 1. Chỉ chứa các màn hình cần Tab Bar (Ví dụ: Home, Roadmap nếu bạn muốn Tab ở dưới)
 const HomeTabs = createBottomTabNavigator({
@@ -77,6 +79,22 @@ const HomeTabs = createBottomTabNavigator({
       screen: LeaderboardScreen,
       options: {
         title: 'LeaderboardScreen',
+        tabBarIcon: ({ color, size }) => (
+          <Image
+            source={newspaper}
+            tintColor={color}
+            style={{
+              width: size,
+              height: size,
+            }}
+          />
+        ),
+      },
+    },
+    BattleHistory: {
+      screen: BattleHistory,
+      options: {
+        title: 'BattleHistory',
         tabBarIcon: ({ color, size }) => (
           <Image
             source={newspaper}
@@ -177,6 +195,20 @@ const RootStack = createNativeStackNavigator({
        screen: LeaderboardScreen,
        options: {
          title: 'LeaderboardScreen',
+         headerShown: true,
+       },
+     },
+     BattleHistory: {
+       screen: BattleHistory,
+       options: {
+         title: 'BattleHistory',
+         headerShown: true,
+       },
+     },
+     BattleDetail: {
+       screen: BattleDetail,
+       options: {
+         title: 'BattleDetail',
          headerShown: true,
        },
      }

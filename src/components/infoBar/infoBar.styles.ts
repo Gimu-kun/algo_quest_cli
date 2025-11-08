@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         flexDirection: 'row',
-        width: '100%',
+        width: '80%',
         paddingVertical:10,
         justifyContent: 'space-between',
         backgroundColor: '#f20717',
@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems:'center',
-        width: '35%',
+        width: '25%',
         height: '100%'
     },
     avatarBox:{

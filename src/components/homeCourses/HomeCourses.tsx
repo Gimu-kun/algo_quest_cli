@@ -59,7 +59,6 @@ const HomeCourses = () => {
         const fetchTopics = async () => {
             try {
                 const response = await axios.get<TopicSummary[]>(TOPICS_SUMMARY_URL);
-                console.log(response)
                 const dataWithImage = response.data.map((topic, index) => ({
                     ...topic,
                     imageUrl: staticImageUrls[index % totalStaticImages] || "",

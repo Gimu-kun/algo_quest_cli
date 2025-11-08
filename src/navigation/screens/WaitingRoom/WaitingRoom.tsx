@@ -171,7 +171,6 @@ const WaitingRoom: React.FC = () => {
         try {
             // Bước 1: Kiểm tra xem username có tồn tại trên Server Spring Boot không
             const checkResponse = await fetch(`${USER_API_URL}/check-username?username=${targetUsername}`);
-            console.log(`${USER_API_URL}/check-username?username=${targetUsername}`);
             if (!checkResponse.ok) {
                 // (Scenario 2)
                 if (checkResponse.status === 404) {
@@ -359,7 +358,6 @@ const WaitingRoom: React.FC = () => {
     };
 
     const handleKickPlayer = async () => {
-        console.log("test");
         if (!isHost || !guest || !roomId) return;
         
         const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'battle_rooms', roomId);

@@ -8,4 +8,5 @@ export type RootStackParamList = {
     AchievementScreen: undefined;
     MultiplayerGame: { roomId: string };
     LeaderBoardScreen: undefined;
+    BattleDetail: {battleId :number}
 };

@@ -42,7 +42,6 @@ export const evaluateAnswer = (question: Question, userResponse: any): { isCorre
     let isCorrect = false;
     let xpEarned = 0;
     const correctAnswers = question.answers.filter(a => a.correct);
-    console.log("correctAnswers",question.answers);
 
 
     switch (question.questionType) {

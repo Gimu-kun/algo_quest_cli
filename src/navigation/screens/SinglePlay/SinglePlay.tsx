@@ -35,7 +35,6 @@ const submitCompletionData = async (completionData: any) => {
         }
 
         const result = await response.json();
-        console.log('API Submit thành công:', result);
         return result;
 
     } catch (error) {
@@ -169,7 +168,6 @@ export const SinglePlay: React.FC = () => {
     }, []);
 
     const handleAnswerChange = useCallback((newResponse: any) => {
-        console.log("newResponse",newResponse);
         setUserAnswers(prevAnswers => {
             const newAnswers = [...prevAnswers];
             newAnswers[currentQuestionIndex].response = newResponse;
